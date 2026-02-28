@@ -8,3 +8,4 @@
 - Notifications page and topbar dropdown.
 - Settings page with bento grid layout.
 - Tutorials: 3-step viewer (Read/Watch/Practice), TLDRs, time estimates, Start/Complete/Claim Badge buttons.
+- News illustrator: trending news with MiniMax video/music generation.
