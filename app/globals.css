@@ -92,6 +92,18 @@ body {
   align-content: start;
 }
 
+/* ---------- Onboarding step transitions ---------- */
+@keyframes fadeSlideIn {
+  from {
+    opacity: 0;
+    transform: translateX(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
 /* ---------- Scrollbar ---------- */
 ::-webkit-scrollbar {
   width: 6px;
@@ -105,4 +117,77 @@ body {
 }
 ::-webkit-scrollbar-thumb:hover {
   background: rgba(255, 255, 255, 0.2);
+}
+
+/* ---------- Blue accent vars ---------- */
+:root {
+  --blue: #3b82f6;
+  --blue-dark: #2563eb;
+  --blue-light: #60a5fa;
+  --blue-glow: rgba(59, 130, 246, 0.4);
+}
+
+/* ---------- Dither / halftone ---------- */
+.dither-dots {
+  position: relative;
+}
+.dither-dots::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: radial-gradient(circle, rgba(255, 255, 255, 0.07) 1px, transparent 1px);
+  background-size: 5px 5px;
+  pointer-events: none;
+  z-index: 1;
+}
+.dither-dots::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: radial-gradient(circle, rgba(255, 255, 255, 0.03) 0.5px, transparent 0.5px);
+  background-size: 3px 3px;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.topo-grid {
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.025) 1px, transparent 1px);
+  background-size: 48px 48px;
+}
+
+/* ---------- White panel (for dashboard left) ---------- */
+.panel-white {
+  background: #ffffff;
+  color: #111827;
+}
+.panel-white .label-muted {
+  color: #9ca3af;
+}
+.panel-white .label-dim {
+  color: #6b7280;
+}
+.panel-white .border-subtle {
+  border-color: #e5e7eb;
+}
+
+/* ---------- Squared card ---------- */
+.sq-card {
+  border: 1px solid #e5e7eb;
+  background: #ffffff;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+.sq-card:hover {
+  border-color: #d1d5db;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+.sq-card-dark {
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.03);
+  transition: border-color 0.2s;
+}
+.sq-card-dark:hover {
+  border-color: rgba(255, 255, 255, 0.14);
 }
