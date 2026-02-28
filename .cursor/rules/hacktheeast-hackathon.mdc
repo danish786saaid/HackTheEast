@@ -1,0 +1,39 @@
+---
+description: HackTheEast hackathon criteria, submission requirements, and problem context
+alwaysApply: true
+---
+
+# HackTheEast – Agent Context
+
+## Problem statement (fill when released)
+
+<!-- Add the official problem statement / theme here on hackathon day. -->
+
+**Current brief:** Build an innovative solution powered by AI that creates meaningful impact (new applications, enhancing existing processes, or redefining user experiences). Use partner/sponsor technologies where relevant. More details released on the day of the hackathon.
+
+---
+
+## What to submit
+
+1. **Team name**
+2. **GitHub repository link** (this repo: https://github.com/danish786saaid/HackTheEast)
+3. **2-minute demo video** introducing the solution
+
+---
+
+## Judging criteria – align all work to these
+
+1. **Novelty & creativity** – Unique angle, new ground technically, more creative than alternatives.
+2. **Demonstrated use of AI/ML** – Genuine use of AI/ML (not superficial), appropriate models, quality implementation, legitimate training data.
+3. **Impact & relevance** – Real problem for real users, scalable beyond prototype, addresses pressing need (HK or global), long-term value.
+4. **Presentation & communication** – Clear problem in video, effective demo of core functionality, professional quality, clear value proposition.
+5. **Technical implementation and scalability** – Clean code, readable structure, architecture that supports growth, performance, robust error handling, appropriate tech stack.
+
+---
+
+## Agent behavior
+
+- Prioritize features and code that directly support the five criteria above.
+- Prefer sponsor/partner technologies when they fit the solution.
+- Keep code organized, documented, and ready for judges to review.
+- When the problem statement is updated, refocus implementation to match it.
