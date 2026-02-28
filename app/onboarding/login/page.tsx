@@ -22,12 +22,10 @@ export default function LoginPage() {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
-  // Redirect if already authenticated
   useEffect(() => {
     if (!user) return;
-    if (onboardingComplete) router.replace("/");
-    else router.replace("/onboarding");
-  }, [user, onboardingComplete, router]);
+    router.replace("/dashboard");
+  }, [user, router]);
 
   const handleSubmit = useCallback(
     async (e: React.FormEvent) => {
@@ -36,8 +34,7 @@ export default function LoginPage() {
       setLoading(true);
       try {
         await login(email.trim(), password);
-        if (onboardingComplete) router.replace("/");
-        else router.replace("/onboarding");
+        router.replace("/dashboard");
       } catch (err) {
         setError((err as Error).message);
       } finally {
