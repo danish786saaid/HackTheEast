@@ -233,3 +233,34 @@ body {
   clip-path: polygon(10% 0%, 90% 0%, 100% 10%, 100% 90%, 90% 100%, 10% 100%, 0% 90%, 0% 10%) !important;
   animation: none !important;
 }
+
+/* ---------- Badge card animations ---------- */
+@keyframes badgeCardIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes checkmarkIn {
+  from {
+    opacity: 0;
+    transform: scale(0.5);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.badge-card-enter {
+  animation: badgeCardIn 0.4s ease-out forwards;
+}
+
+.badge-check-in {
+  animation: checkmarkIn 0.25s ease-out forwards;
+}
