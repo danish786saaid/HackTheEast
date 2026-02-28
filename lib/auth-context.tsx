@@ -171,20 +171,28 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     saveStored(u ? { user: u, onboardingComplete: complete } : null);
   }, []);
 
-  // Hydrate: check Supabase session first, then localStorage fallback
+  // Hydrate: check Supabase session first, then localStorage. Unblock UI quickly; retry session in background for OAuth redirect.
   useEffect(() => {
+    async function tryGetSession(): Promise<boolean> {
+      if (!supabase) return false;
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+      if (session?.user) {
+        const mapped = mapSupabaseUser(session.user);
+        await migrateGuestPrefsIfNeeded(mapped.id);
+        persist(mapped, true);
+        return true;
+      }
+      return false;
+    }
+
+    let cancelled = false;
+
     async function init() {
-      if (supabase) {
-        const {
-          data: { session },
-        } = await supabase.auth.getSession();
-        if (session?.user) {
-          const mapped = mapSupabaseUser(session.user);
-          await migrateGuestPrefsIfNeeded(mapped.id);
-          persist(mapped, true);
-          setHydrated(true);
-          return;
-        }
+      if (await tryGetSession()) {
+        setHydrated(true);
+        return;
       }
       const stored = loadStored();
       if (stored?.user) {
@@ -192,14 +200,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setOnboardingComplete(stored.onboardingComplete ?? false);
       }
       setHydrated(true);
+
+      // After OAuth redirect, cookies may appear shortly — retry in background without blocking UI
+      await new Promise((r) => setTimeout(r, 400));
+      if (!cancelled && (await tryGetSession())) {
+        setHydrated(true);
+      }
     }
 
     init();
 
+    let unsub: (() => void) | undefined;
     if (supabase) {
       const {
         data: { subscription },
-      } =       supabase.auth.onAuthStateChange(async (_event, session) => {
+      } = supabase.auth.onAuthStateChange(async (_event, session) => {
         if (session?.user) {
           const mapped = mapSupabaseUser(session.user);
           await migrateGuestPrefsIfNeeded(mapped.id);
@@ -208,8 +223,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           persist(null, false);
         }
       });
-      return () => subscription.unsubscribe();
+      unsub = () => subscription.unsubscribe();
     }
+
+    return () => {
+      cancelled = true;
+      unsub?.();
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 

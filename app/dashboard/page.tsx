@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import TopBar from "@/components/layout/TopBar";
 import BentoMain from "@/components/dashboard/BentoMain";
@@ -9,6 +9,7 @@ import { useAuth } from "@/lib/auth-context";
 export default function DashboardPage() {
   const router = useRouter();
   const { user, onboardingComplete, isAuthenticated } = useAuth();
+  const [stuck, setStuck] = useState(false);
 
   useEffect(() => {
     if (!isAuthenticated || !user) {
@@ -20,6 +21,17 @@ export default function DashboardPage() {
       return;
     }
   }, [isAuthenticated, user, onboardingComplete, router]);
+
+  // If still showing loading after 2.5s (e.g. post-OAuth session not synced), redirect to home
+  useEffect(() => {
+    const t = setTimeout(() => setStuck(true), 2500);
+    return () => clearTimeout(t);
+  }, []);
+  useEffect(() => {
+    if (stuck && (!user || !onboardingComplete)) {
+      router.replace("/");
+    }
+  }, [stuck, user, onboardingComplete, router]);
 
   if (!isAuthenticated || !user || !onboardingComplete) {
     return (
