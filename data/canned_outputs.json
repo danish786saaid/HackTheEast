@@ -1,0 +1,88 @@
+{
+  "goals": {
+    "Understand LLM safety basics": {
+      "goal": "Understand LLM safety basics",
+      "path": [
+        {
+          "step": "Read",
+          "item_title": "LLM Safety Primer: Alignment, Red-Teaming & Guardrails",
+          "item_url": "https://gmasia.org/llm-safety-primer",
+          "tldr": "Comprehensive overview of alignment techniques, adversarial testing, and production safety guardrails for LLMs.",
+          "minutes": 25
+        },
+        {
+          "step": "Watch",
+          "item_title": "GMAsia Event: AI Safety Summit Hong Kong Highlights",
+          "item_url": "https://gmasia.org/ai-safety-summit-hk",
+          "tldr": "Key takeaways from leading AI safety researchers on governance, red-teaming, and real-world policy proposals.",
+          "minutes": 30
+        },
+        {
+          "step": "Practice",
+          "item_title": "Practice: Red-Team Your Own LLM Application",
+          "item_url": "https://gmasia.org/red-team-llm",
+          "tldr": "Hands-on exercise to identify and exploit prompt injection, jailbreak, and data leakage vulnerabilities in your own app.",
+          "minutes": 30
+        }
+      ],
+      "rationale": "This path builds from foundational safety concepts to real-world summit insights, then reinforces learning through hands-on red-teaming practice. Total time: 85 minutes.",
+      "use_canned": true
+    },
+    "Learn about RAG pipelines": {
+      "goal": "Learn about RAG pipelines",
+      "path": [
+        {
+          "step": "Read",
+          "item_title": "Understanding Embedding Models: From Word2Vec to text-embedding-3",
+          "item_url": "https://gmasia.org/embedding-models-guide",
+          "tldr": "Foundational knowledge on how text embeddings work and how to choose the right model for retrieval tasks.",
+          "minutes": 20
+        },
+        {
+          "step": "Watch",
+          "item_title": "Video: Building RAG Pipelines with LangChain & Supabase",
+          "item_url": "https://gmasia.org/rag-langchain-supabase",
+          "tldr": "Hands-on tutorial showing how to build a complete retrieval-augmented generation system from scratch.",
+          "minutes": 35
+        },
+        {
+          "step": "Practice",
+          "item_title": "Practice: Implement Cosine Similarity Search from Scratch",
+          "item_url": "https://gmasia.org/cosine-similarity-exercise",
+          "tldr": "Build your own semantic search engine using cosine similarity to deeply understand how retrieval works.",
+          "minutes": 30
+        }
+      ],
+      "rationale": "Starts with embedding fundamentals, progresses to a full RAG implementation walkthrough, and cements understanding through building a retriever from scratch. Total time: 85 minutes.",
+      "use_canned": true
+    },
+    "Explore crypto regulation in Asia": {
+      "goal": "Explore crypto regulation in Asia",
+      "path": [
+        {
+          "step": "Read",
+          "item_title": "Crypto Regulation in Asia: 2026 Policy Landscape",
+          "item_url": "https://gmasia.org/crypto-reg-asia-2026",
+          "tldr": "Up-to-date overview of cryptocurrency regulation across Hong Kong, Singapore, Japan, and South Korea.",
+          "minutes": 20
+        },
+        {
+          "step": "Watch",
+          "item_title": "Video: Zero-Knowledge Proofs Explained for Developers",
+          "item_url": "https://gmasia.org/zkp-developers",
+          "tldr": "Understand the privacy-preserving cryptographic primitives that underpin next-generation compliant crypto systems.",
+          "minutes": 30
+        },
+        {
+          "step": "Practice",
+          "item_title": "Practice: Build a Blockchain Badge Issuer with Solidity",
+          "item_url": "https://gmasia.org/blockchain-badge-solidity",
+          "tldr": "Hands-on exercise creating a verifiable credential contract to understand blockchain-based compliance tools.",
+          "minutes": 35
+        }
+      ],
+      "rationale": "Builds regulatory context first, adds technical depth with privacy tech, then applies learning through a practical blockchain exercise. Total time: 85 minutes.",
+      "use_canned": true
+    }
+  }
+}
