@@ -171,3 +171,111 @@ export const MOCK_LEARNING_TREND = [
   { day: "Sat", progress: 76, articles: 6 },
   { day: "Sun", progress: 78, articles: 7 },
 ];
+
+export type BadgeStepStatus = "completed" | "active" | "locked";
+
+export type BadgeStep = { label: string; status: BadgeStepStatus };
+
+export type BadgeType = "mastery" | "tutorial";
+
+export const MOCK_BADGES: {
+  id: string;
+  title: string;
+  description: string;
+  icon: string;
+  type: BadgeType;
+  steps: BadgeStep[];
+  achieved: boolean;
+}[] = [
+  {
+    id: "mastery-ai",
+    title: "AI & ML",
+    description: "Master core concepts in artificial intelligence and machine learning.",
+    icon: "Brain",
+    type: "mastery",
+    steps: [
+      { label: "Learn", status: "completed" },
+      { label: "Practice", status: "completed" },
+      { label: "Master", status: "completed" },
+    ],
+    achieved: true,
+  },
+  {
+    id: "mastery-crypto",
+    title: "Crypto & Blockchain",
+    description: "Demonstrate understanding of blockchain technology and cryptocurrencies.",
+    icon: "Coins",
+    type: "mastery",
+    steps: [
+      { label: "Learn", status: "completed" },
+      { label: "Practice", status: "active" },
+      { label: "Master", status: "locked" },
+    ],
+    achieved: false,
+  },
+  {
+    id: "mastery-geopolitics",
+    title: "Geopolitics & Policy",
+    description: "Show competency in tech policy and geopolitical dynamics.",
+    icon: "Globe",
+    type: "mastery",
+    steps: [
+      { label: "Learn", status: "active" },
+      { label: "Practice", status: "locked" },
+      { label: "Master", status: "locked" },
+    ],
+    achieved: false,
+  },
+  {
+    id: "mastery-career",
+    title: "Career & Skills",
+    description: "Prove proficiency in career development and skill-building paths.",
+    icon: "GraduationCap",
+    type: "mastery",
+    steps: [
+      { label: "Learn", status: "locked" },
+      { label: "Practice", status: "locked" },
+      { label: "Master", status: "locked" },
+    ],
+    achieved: false,
+  },
+  {
+    id: "tutorial-defi",
+    title: "Introduction to DeFi",
+    description: "Complete the full 3-step path for decentralized finance fundamentals.",
+    icon: "Wallet",
+    type: "tutorial",
+    steps: [
+      { label: "Learn", status: "completed" },
+      { label: "Practice", status: "completed" },
+      { label: "Master", status: "completed" },
+    ],
+    achieved: true,
+  },
+  {
+    id: "tutorial-ethics",
+    title: "AI Ethics & Governance",
+    description: "Earn this badge by finishing Learn, Practice, and Master for AI Ethics.",
+    icon: "Shield",
+    type: "tutorial",
+    steps: [
+      { label: "Learn", status: "completed" },
+      { label: "Practice", status: "completed" },
+      { label: "Master", status: "active" },
+    ],
+    achieved: false,
+  },
+  {
+    id: "tutorial-blockchain",
+    title: "Blockchain Fundamentals",
+    description: "Unlock by completing all three steps of the blockchain tutorial.",
+    icon: "Layers",
+    type: "tutorial",
+    steps: [
+      { label: "Learn", status: "completed" },
+      { label: "Practice", status: "locked" },
+      { label: "Master", status: "locked" },
+    ],
+    achieved: false,
+  },
+];

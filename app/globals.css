@@ -106,3 +106,34 @@ body {
 ::-webkit-scrollbar-thumb:hover {
   background: rgba(255, 255, 255, 0.2);
 }
+
+/* ---------- Badge card animations ---------- */
+@keyframes badgeCardIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes checkmarkIn {
+  from {
+    opacity: 0;
+    transform: scale(0.5);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.badge-card-enter {
+  animation: badgeCardIn 0.4s ease-out forwards;
+}
+
+.badge-check-in {
+  animation: checkmarkIn 0.25s ease-out forwards;
+}
