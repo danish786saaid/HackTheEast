@@ -5,19 +5,19 @@ import {
   MOCK_ACHIEVEMENTS,
   MOCK_BADGES,
   MOCK_CATEGORY_WEEKLY,
-  MOCK_STREAK,
   MOCK_TUTORIALS,
   RULE_CATEGORIES,
-  LEARNING_HEALTH,
 } from "@/lib/constants";
 import type { BadgeStepStatus } from "@/lib/constants";
 import type { RuleCategoryId } from "@/lib/constants";
+import Link from "next/link";
 import {
   Award,
   BookOpen,
   Brain,
   Check,
   ChevronDown,
+  X,
   Coins,
   Compass,
   Flame,
@@ -39,6 +39,42 @@ import {
 } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
+import { useTutorialProgress } from "@/contexts/TutorialProgressContext";
+import { useDashboardData } from "@/hooks/useDashboardData";
+
+function getTutorialStreakFromProgress(
+  progress: Record<string, { watchedPercent: number; lastWatchedAt: string }>
+): { currentStreak: number; weekActivity: number[] } {
+  const activityDates = new Set<string>();
+  Object.values(progress).forEach((entry) => {
+    if (!entry?.lastWatchedAt) return;
+    const d = new Date(entry.lastWatchedAt);
+    const dateStr = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+    activityDates.add(dateStr);
+  });
+  const today = new Date();
+  const toDateStr = (date: Date) =>
+    `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
+  let currentStreak = 0;
+  let d = new Date(today);
+  while (activityDates.has(toDateStr(d))) {
+    currentStreak++;
+    d.setDate(d.getDate() - 1);
+  }
+  const weekActivity: number[] = [];
+  for (let i = 6; i >= 0; i--) {
+    const day = new Date(today);
+    day.setDate(day.getDate() - i);
+    weekActivity.push(activityDates.has(toDateStr(day)) ? 100 : 0);
+  }
+  return { currentStreak, weekActivity };
+}
+
+function formatTutorialsWatched(seconds: number): string {
+  if (seconds < 60) return `${seconds} sec`;
+  if (seconds < 3600) return `${(seconds / 60).toFixed(1)} min`;
+  return `${(seconds / 3600).toFixed(1)} hrs`;
+}
 
 const BADGE_ICON_MAP = {
   Brain,
@@ -80,18 +116,105 @@ function progressColor(achieved: boolean, inProgress: boolean) {
   return "#78716c";
 }
 
+// --- Badges Earned Popover ---
+function BadgesEarnedPopover({
+  completedTutorials,
+  onClose,
+}: {
+  completedTutorials: { id: string; title: string }[];
+  onClose: () => void;
+}) {
+  return createPortal(
+    <>
+      <div
+        className="fixed inset-0 z-40 bg-black/50"
+        onClick={onClose}
+        onMouseDown={onClose}
+        aria-hidden
+      />
+      <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+        <div
+          className="popover-enter relative w-full max-w-sm rounded-none border border-white/[0.1] bg-[#0c0a09] p-4 shadow-xl"
+          onClick={(e) => e.stopPropagation()}
+        >
+          <div className="flex items-start justify-between gap-2">
+            <h3 className="text-sm font-semibold text-white">
+              Badges earned from
+            </h3>
+            <button
+              type="button"
+              onClick={onClose}
+              className="-m-1 flex h-7 w-7 shrink-0 items-center justify-center rounded-none text-[#78716c] transition-colors hover:bg-white/[0.08] hover:text-white"
+              aria-label="Close"
+            >
+              <X className="h-4 w-4" />
+            </button>
+          </div>
+          {completedTutorials.length > 0 ? (
+            <ul className="mt-3 space-y-2">
+              {completedTutorials.map((t) => (
+                <li key={t.id}>
+                  <Link
+                    href={`/tutorials/${t.id}`}
+                    onClick={onClose}
+                    className="flex items-center gap-2 rounded-none border border-white/[0.06] bg-white/[0.03] px-3 py-2 text-sm text-white transition-colors hover:border-[#3b82f6]/40 hover:bg-[#3b82f6]/5"
+                  >
+                    <Check className="h-4 w-4 shrink-0 text-[#22c55e]" />
+                    {t.title}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className="mt-3 text-xs text-[#78716c]">
+              No tutorials completed yet.
+            </p>
+          )}
+          <p className="mt-3 text-[11px] text-[#78716c]">
+            Earn more badges by completing tutorials
+          </p>
+        </div>
+      </div>
+    </>,
+    document.body
+  );
+}
+
 // --- Stats Hero ---
 function StatsHero() {
-  const earnedCount = MOCK_BADGES.filter((b) => b.achieved).length;
-  const totalCount = MOCK_BADGES.length;
-  const masteryItem = LEARNING_HEALTH.find((h) => h.label === "MASTERY");
-  const timeItem = LEARNING_HEALTH.find((h) => h.label === "TIME SAVED");
+  const { getProgress, progress } = useTutorialProgress();
+  const { stats } = useDashboardData();
+  const [badgesPopoverOpen, setBadgesPopoverOpen] = useState(false);
+
+  const earnedCount = useMemo(() => {
+    return MOCK_BADGES.filter(
+      (b) => b.type === "tutorial" && b.tutorialId && getProgress(b.tutorialId) >= 100
+    ).length;
+  }, [getProgress, progress]);
+
+  const completedTutorials = useMemo(() => {
+    return MOCK_TUTORIALS.filter((t) => getProgress(t.id) >= 100).map((t) => ({
+      id: t.id,
+      title: t.title,
+    }));
+  }, [getProgress, progress]);
+
+  const { currentStreak, weekActivity } = useMemo(
+    () => getTutorialStreakFromProgress(progress),
+    [progress]
+  );
+
+  const totalCount = 7;
+  const masteryPercent = stats.mastery;
+  const timeInvestedFormatted = formatTutorialsWatched(stats.tutorialsWatchedSeconds);
 
   return (
     <section className="mb-8">
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <div
-          className="glass-card badge-card-enter p-4"
+        <button
+          type="button"
+          onClick={() => setBadgesPopoverOpen(true)}
+          className="glass-card badge-card-enter flex w-full flex-col items-start p-4 text-left cursor-pointer transition-colors hover:border-white/[0.12] focus:outline-none focus:ring-1 focus:ring-[#3b82f6]/40"
           style={{ animationDelay: "0s", animationFillMode: "backwards" }}
         >
           <p className="text-[10px] font-medium uppercase tracking-wider text-[#78716c]">
@@ -100,7 +223,13 @@ function StatsHero() {
           <p className="mt-1 text-2xl font-bold tabular-nums text-white">
             {earnedCount} of {totalCount}
           </p>
-        </div>
+        </button>
+        {badgesPopoverOpen && (
+          <BadgesEarnedPopover
+            completedTutorials={completedTutorials}
+            onClose={() => setBadgesPopoverOpen(false)}
+          />
+        )}
 
         <div
           className="glass-card badge-card-enter p-4"
@@ -116,10 +245,10 @@ function StatsHero() {
             </p>
           </div>
           <p className="mt-1 text-2xl font-bold tabular-nums text-white">
-            {MOCK_STREAK.currentStreak} days
+            {currentStreak} days
           </p>
           <div className="mt-2 flex gap-1">
-            {MOCK_STREAK.weekActivity.map((val, i) => (
+            {weekActivity.map((val, i) => (
               <div
                 key={i}
                 className="h-2 flex-1 rounded-none transition-colors"
@@ -143,12 +272,12 @@ function StatsHero() {
             Overall Mastery
           </p>
           <p className="mt-1 text-2xl font-bold tabular-nums text-white">
-            {masteryItem?.value ?? "78%"}
+            {masteryPercent}%
           </p>
           <div className="mt-2 h-1.5 overflow-hidden rounded-none bg-white/[0.08]">
             <div
               className="h-full rounded-none bg-[#22c55e] transition-all duration-700"
-              style={{ width: masteryItem?.value ?? "78%" }}
+              style={{ width: `${masteryPercent}%` }}
             />
           </div>
         </div>
@@ -161,13 +290,10 @@ function StatsHero() {
             Time Invested
           </p>
           <p className="mt-1 text-2xl font-bold tabular-nums text-white">
-            {timeItem?.value ?? "6.2"}
-            <span className="ml-0.5 text-sm font-medium text-[#78716c]">
-              {timeItem?.unit ?? "h"}
-            </span>
+            {timeInvestedFormatted}
           </p>
           <p className="mt-0.5 text-[10px] text-[#78716c]">
-            {timeItem?.sublabel ?? "from AI summaries"}
+            from tutorials watched
           </p>
         </div>
       </div>
@@ -380,6 +506,21 @@ function StepPopover({
   );
 }
 
+function getStepsFromWatchedPercent(
+  labels: string[],
+  watchedPercent: number
+): { label: string; status: BadgeStepStatus }[] {
+  const thresholds = [33, 66, 100];
+  return labels.map((label, i) => {
+    const thresh = thresholds[i] ?? 100;
+    const prevThresh = i > 0 ? (thresholds[i - 1] ?? 0) : 0;
+    if (watchedPercent >= thresh) return { label, status: "completed" as const };
+    if (i === 0) return { label, status: "active" as const }; // First step always active until completed
+    if (watchedPercent >= prevThresh) return { label, status: "active" as const };
+    return { label, status: "locked" as const };
+  });
+}
+
 // --- Tutorial Badge Row ---
 function TutorialBadgeRow({
   tutorial,
@@ -396,17 +537,19 @@ function TutorialBadgeRow({
   onStepClick: (step: { label: string; status: BadgeStepStatus }) => void;
   onStepClose: () => void;
 }) {
-  const activeTutorial = useMemo(() => {
-    const byTitle: Record<string, { currentModule: number; totalModules: number }> = {
-      "Introduction to DeFi": { currentModule: 3, totalModules: 5 },
-      "AI Ethics & Governance": { currentModule: 4, totalModules: 5 },
-      "Blockchain Fundamentals": { currentModule: 1, totalModules: 4 },
-    };
-    return byTitle[tutorial.title] ?? {
-      currentModule: 0,
-      totalModules: tutorial.modules,
-    };
-  }, [tutorial]);
+  const { getProgress } = useTutorialProgress();
+  const watchedPercent = badge.tutorialId ? getProgress(badge.tutorialId) : 0;
+
+  const { steps, currentModule, totalModules } = useMemo(() => {
+    const totalModules = tutorial.modules;
+    const currentModule = Math.min(
+      totalModules,
+      Math.ceil((watchedPercent / 100) * totalModules) || 0
+    );
+    const labels = badge.steps.map((s) => s.label);
+    const steps = getStepsFromWatchedPercent(labels, watchedPercent);
+    return { steps, currentModule, totalModules };
+  }, [badge, tutorial.modules, watchedPercent]);
 
   const anchorRef = useRef<HTMLButtonElement | null>(null);
 
@@ -421,11 +564,11 @@ function TutorialBadgeRow({
       <div className="mb-3 flex items-center justify-between">
         <h3 className="text-sm font-semibold text-white">{tutorial.title}</h3>
         <span className="text-[10px] text-[#78716c]">
-          {activeTutorial.currentModule} of {activeTutorial.totalModules} modules
+          {currentModule} of {totalModules} modules
         </span>
       </div>
       <div className="flex flex-wrap items-center gap-2">
-        {badge.steps.map((step) => {
+        {steps.map((step) => {
           const color = progressColor(
             step.status === "completed",
             step.status === "active"
@@ -477,14 +620,14 @@ function TutorialBadgeRow({
         <div className="mb-1 flex items-center justify-between">
           <span className="text-[10px] text-[#78716c]">Module progress</span>
           <span className="text-[10px] tabular-nums text-[#a8a29e]">
-            {activeTutorial.currentModule} of {activeTutorial.totalModules}
+            {currentModule} of {totalModules}
           </span>
         </div>
         <div className="h-1.5 w-full overflow-hidden rounded-none bg-white/[0.08]">
           <div
             className="h-full rounded-none bg-[#3b82f6] transition-all duration-500"
             style={{
-              width: `${activeTutorial.totalModules > 0 ? (activeTutorial.currentModule / activeTutorial.totalModules) * 100 : 0}%`,
+              width: `${totalModules > 0 ? (currentModule / totalModules) * 100 : 0}%`,
             }}
           />
         </div>
@@ -514,6 +657,15 @@ export default function BadgesPage() {
     []
   );
 
+  const { getProgress, progress } = useTutorialProgress();
+  const badgesEarnedCount = useMemo(
+    () =>
+      MOCK_BADGES.filter(
+        (b) => b.type === "tutorial" && b.tutorialId && getProgress(b.tutorialId) >= 100
+      ).length,
+    [getProgress, progress]
+  );
+
   const firstRowAchievements = MOCK_ACHIEVEMENTS.slice(0, FIRST_ROW_COUNT);
   const extraAchievements = MOCK_ACHIEVEMENTS.slice(FIRST_ROW_COUNT);
   const achievedCount = MOCK_ACHIEVEMENTS.filter((a) => a.achieved).length;
@@ -538,8 +690,7 @@ export default function BadgesPage() {
           <p className="mt-0.5 text-xs text-[#78716c]">
             Complete Learn → Practice → Master for each path.{" "}
             <span className="font-medium text-[#a8a29e]">
-              {MOCK_BADGES.filter((b) => b.achieved).length} of{" "}
-              {MOCK_BADGES.length} earned
+              {badgesEarnedCount} of 7 earned
             </span>
           </p>
         </header>

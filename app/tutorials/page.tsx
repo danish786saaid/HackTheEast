@@ -4,22 +4,31 @@ import { useState, useMemo } from "react";
 import Link from "next/link";
 import TopBar from "@/components/layout/TopBar";
 import { MOCK_TUTORIALS } from "@/lib/constants";
-import { Search, BookOpen, Clock, BarChart2, ArrowRight } from "lucide-react";
+import { useTutorialProgress } from "@/contexts/TutorialProgressContext";
+import { Search, BookOpen, Clock, BarChart2, ArrowRight, CheckCircle } from "lucide-react";
 import Image from "next/image";
 
 export default function TutorialsPage() {
   const [query, setQuery] = useState("");
+  const { getProgress } = useTutorialProgress();
 
   const filtered = useMemo(() => {
     const q = query.toLowerCase().trim();
-    if (!q) return MOCK_TUTORIALS;
-    return MOCK_TUTORIALS.filter(
-      (t) =>
-        t.title.toLowerCase().includes(q) ||
-        t.description.toLowerCase().includes(q) ||
-        t.level.toLowerCase().includes(q),
-    );
-  }, [query]);
+    const list = !q
+      ? [...MOCK_TUTORIALS]
+      : MOCK_TUTORIALS.filter(
+          (t) =>
+            t.title.toLowerCase().includes(q) ||
+            t.description.toLowerCase().includes(q) ||
+            t.level.toLowerCase().includes(q),
+        );
+    return list.sort((a, b) => {
+      const aDone = getProgress(a.id) >= 100;
+      const bDone = getProgress(b.id) >= 100;
+      if (aDone === bDone) return 0;
+      return aDone ? 1 : -1;
+    });
+  }, [query, getProgress]);
 
   return (
     <>
@@ -52,11 +61,22 @@ export default function TutorialsPage() {
 
         {filtered.length > 0 ? (
           <div className="mt-10 grid grid-cols-3 gap-5">
-            {filtered.map((t) => (
+            {filtered.map((t) => {
+              const completed = getProgress(t.id) >= 100;
+              const progress = getProgress(t.id);
+              return (
               <Link key={t.id} href={`/tutorials/${t.id}`}>
               <article
-                className="group flex flex-col overflow-hidden border border-white/[0.06] bg-[#141211] transition-all duration-300 hover:border-white/[0.12]"
+                className={`group relative flex flex-col overflow-hidden border bg-[#141211] transition-all duration-300 hover:border-white/[0.12] ${
+                  completed ? "border-emerald-500/30 opacity-90" : "border-white/[0.06]"
+                }`}
               >
+                {completed && (
+                  <div className="absolute right-3 top-3 z-10 flex items-center gap-1 rounded-full bg-emerald-500/90 px-2.5 py-1 text-[10px] font-semibold text-white shadow-lg backdrop-blur-sm">
+                    <CheckCircle className="h-3.5 w-3.5" />
+                    Completed
+                  </div>
+                )}
                 <div className="relative aspect-[4/3] w-full overflow-hidden">
                   <Image
                     src={t.imageUrl}
@@ -81,6 +101,14 @@ export default function TutorialsPage() {
                       {t.level}
                     </span>
                   </div>
+                  {progress > 0 && (
+                    <div className="absolute bottom-0 left-0 right-0 h-1 bg-white/20">
+                      <div
+                        className="h-full bg-red-500 transition-all duration-300"
+                        style={{ width: `${Math.min(100, progress)}%` }}
+                      />
+                    </div>
+                  )}
                 </div>
 
                 <div className="flex flex-1 flex-col justify-between border-t border-gray-200 bg-white px-5 py-4">
@@ -93,13 +121,14 @@ export default function TutorialsPage() {
                     </p>
                   </div>
                   <div className="mt-3 flex items-center text-[11px] font-medium text-[#3b82f6] opacity-0 transition-opacity duration-300 group-hover:opacity-100">
-                    Start learning
+                    {completed ? "Review" : "Start learning"}
                     <ArrowRight className="ml-1 h-3 w-3" />
                   </div>
                 </div>
               </article>
               </Link>
-            ))}
+            );
+            })}
           </div>
         ) : (
           <div className="mt-20 text-center">
