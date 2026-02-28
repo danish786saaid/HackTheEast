@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
-import { createClient } from "@/lib/supabase/client";
+import { supabase } from "@/lib/supabaseClient";
 
 type QueryState<T> = {
   data: T | null;
@@ -24,7 +24,6 @@ export function useSupabaseQuery<T>(
   const [error, setError] = useState<string | null>(null);
 
   const execute = useCallback(async () => {
-    const supabase = createClient();
     if (!supabase) {
       setData(fallback);
       setLoading(false);

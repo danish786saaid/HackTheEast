@@ -2,7 +2,7 @@
 
 import { useState, useCallback, useEffect } from "react";
 import Link from "next/link";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { Eye, EyeOff } from "lucide-react";
 import AuthPageLayout from "@/components/onboarding/AuthPageLayout";
 import { useAuth } from "@/lib/auth-context";
@@ -15,15 +15,14 @@ const STEPS = [
 
 export default function LoginPage() {
   const router = useRouter();
-  const searchParams = useSearchParams();
   const { user, onboardingComplete, login, signInWithOAuth } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const [error, setError] = useState<string | null>(searchParams?.get("error") ?? null);
+  const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
-  // Redirect if already authenticated — go to dashboard, not onboarding
+  // Redirect if already authenticated
   useEffect(() => {
     if (!user) return;
     if (onboardingComplete) router.replace("/dashboard");

@@ -3,7 +3,7 @@
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import TopBar from "@/components/layout/TopBar";
-import Dashboard from "@/components/dashboard/Dashboard";
+import BentoMain from "@/components/dashboard/BentoMain";
 import { useAuth } from "@/lib/auth-context";
 
 export default function DashboardPage() {
@@ -32,7 +32,7 @@ export default function DashboardPage() {
   return (
     <>
       <TopBar />
-      <Dashboard />
+      <BentoMain />
     </>
   );
 }

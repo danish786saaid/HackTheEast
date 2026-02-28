@@ -24,7 +24,7 @@ export default function RegisterPage() {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
-  // Redirect if already authenticated — go to dashboard, not onboarding
+  // Redirect if already authenticated
   useEffect(() => {
     if (!user) return;
     if (onboardingComplete) router.replace("/dashboard");
@@ -42,10 +42,7 @@ export default function RegisterPage() {
       setLoading(true);
       try {
         const name = [firstName.trim(), lastName.trim()].filter(Boolean).join(" ") || "User";
-        await doRegister(name, email.trim(), password, {
-          first_name: firstName.trim(),
-          last_name: lastName.trim(),
-        });
+        await doRegister(name, email.trim(), password);
         router.replace("/");
       } catch (err) {
         setError((err as Error).message);
