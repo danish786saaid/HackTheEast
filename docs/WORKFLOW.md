@@ -7,9 +7,9 @@ main (stable, deployable)
   │
   └── integration (merge target)
         │
-        ├── frontend/   — FE: UI, Notifs, audio playback, demo recording
-        ├── backend/    — BE: APIs, seed loader, badge signing
-        └── ai/        — ML: embeddings, canned outputs, MiniMax prompts
+        ├── frontend-app  — FE: UI, Notifs, audio playback, demo recording
+        ├── backend-app   — BE: APIs, seed loader, badge signing
+        └── ai-ml         — ML: embeddings, canned outputs, MiniMax prompts
 ```
 
 ## Merge flow
@@ -22,9 +22,9 @@ main (stable, deployable)
 
 | Role | Branch | Primary tasks |
 |------|--------|---------------|
-| **FE** | `frontend/` | Goal input, Generate Path button, path display, Claim Badge, Notifs panel, audio playback |
-| **BE** | `backend/` | `/api/retrieve`, `/api/generate_path`, `/api/claim_badge`, `/api/verify_badge`, seed loader, HMAC signing |
-| **ML** | `ai/` | `items_with_embeddings.json`, `canned_outputs.json`, MiniMax prompt, fallback MP3 |
+| **FE** | `frontend-app` | Goal input, Generate Path button, path display, Claim Badge, Notifs panel, audio playback |
+| **BE** | `backend-app` | `/api/retrieve`, `/api/generate_path`, `/api/claim_badge`, `/api/verify_badge`, seed loader, HMAC signing |
+| **ML** | `ai-ml` | `items_with_embeddings.json`, `canned_outputs.json`, MiniMax prompt, fallback MP3 |
 | **PD** | — | Demo script, slides, fallback video, acceptance tests, final merge |
 
 ## API contracts (on main)
@@ -44,7 +44,7 @@ Stubs: `lib/api-stubs.js` (backend replaces with real logic)
 ```bash
 git checkout integration
 git pull
-git checkout -b frontend/   # or backend/ or ai/
+git checkout -b frontend-app   # or backend-app or ai-ml
 # Work, commit, push
 # Open PR into integration
 ```
