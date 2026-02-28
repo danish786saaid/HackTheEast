@@ -25,8 +25,8 @@ export default function LoginPage() {
   // Redirect if already authenticated
   useEffect(() => {
     if (!user) return;
-    if (onboardingComplete) router.replace("/dashboard");
-    else router.replace("/");
+    if (onboardingComplete) router.replace("/");
+    else router.replace("/onboarding");
   }, [user, onboardingComplete, router]);
 
   const handleSubmit = useCallback(
@@ -36,14 +36,15 @@ export default function LoginPage() {
       setLoading(true);
       try {
         await login(email.trim(), password);
-        router.replace("/");
+        if (onboardingComplete) router.replace("/");
+        else router.replace("/onboarding");
       } catch (err) {
         setError((err as Error).message);
       } finally {
         setLoading(false);
       }
     },
-    [email, password, login, router]
+    [email, password, login, onboardingComplete, router]
   );
 
   const handleGoogle = useCallback(async () => {

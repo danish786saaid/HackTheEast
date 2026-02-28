@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import GlowWord from "../GlowWord";
-import { useAuth } from "@/lib/auth-context";
 
 type Props = {
   onNext: () => void;
@@ -19,8 +18,6 @@ function glowWords(text: string, dim = false) {
 }
 
 export default function WelcomeStep({ onNext }: Props) {
-  const { isAuthenticated } = useAuth();
-
   return (
     <div className="relative flex flex-col items-center">
       <div className="flex flex-col items-center text-center pt-20">
@@ -60,14 +57,12 @@ export default function WelcomeStep({ onNext }: Props) {
           <ArrowRight className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-1" />
         </button>
 
-        {!isAuthenticated && (
-          <Link
-            href="/onboarding/login"
-            className="mt-4 inline-block text-sm font-medium text-white/60 transition-colors hover:text-white"
-          >
-            Login
-          </Link>
-        )}
+        <Link
+          href="/onboarding/login"
+          className="mt-4 inline-block text-sm font-medium text-white/60 transition-colors hover:text-white"
+        >
+          Login
+        </Link>
 
         <p className="mt-6 text-xs text-white/20">
           Your preferences can be changed later in settings.
