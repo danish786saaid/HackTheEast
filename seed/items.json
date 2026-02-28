@@ -1,0 +1,58 @@
+[
+  {
+    "id": "1",
+    "title": "LLM Safety Primer",
+    "url": "https://example.com/llm-safety-primer",
+    "type": "article",
+    "description": "Introduction to LLM safety and alignment"
+  },
+  {
+    "id": "2",
+    "title": "RLHF Explained",
+    "url": "https://example.com/rlhf",
+    "type": "video",
+    "description": "Reinforcement learning from human feedback"
+  },
+  {
+    "id": "3",
+    "title": "Alignment Hands-On Exercise",
+    "url": "https://example.com/alignment-exercise",
+    "type": "practice",
+    "description": "Practice red-teaming an LLM"
+  },
+  {
+    "id": "4",
+    "title": "GMAsia AI Ethics Panel",
+    "url": "https://example.com/gmasia-panel",
+    "type": "video",
+    "description": "Panel on AI ethics in Asia"
+  },
+  {
+    "id": "5",
+    "title": "Constitutional AI Overview",
+    "url": "https://example.com/constitutional-ai",
+    "type": "article",
+    "description": "Constitutional AI principles"
+  },
+  {
+    "id": "6",
+    "title": "Crypto Regulation in Hong Kong",
+    "url": "https://example.com/hk-crypto",
+    "type": "article",
+    "description": "Overview of HK crypto policy"
+  },
+  {
+    "id": "7",
+    "title": "Zero-Knowledge Proofs Tutorial",
+    "url": "https://example.com/zkp",
+    "type": "video",
+    "description": "ZK proofs for developers"
+  },
+  {
+    "id": "8",
+    "title": "Smart Contract Security Lab",
+    "url": "https://example.com/sc-security",
+    "type": "practice",
+    "description": "Audit a sample smart contract"
+  }
+]

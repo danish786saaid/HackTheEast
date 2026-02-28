@@ -8,9 +8,7 @@ import { useAuth, initials } from "@/lib/auth-context";
 
 const navItems = [
   { label: "Dashboard", href: "/" },
-  { label: "Content Feed", href: "/feed" },
-  { label: "Learning Path", href: "/path" },
-  { label: "Preferences", href: "/preferences" },
+  { label: "Notifs", href: "/notifs" },
 ];
 
 export default function TopBar() {
