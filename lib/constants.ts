@@ -256,6 +256,61 @@ export const MOCK_LEARNING_TREND = [
   { day: "Sun", progress: 78, articles: 7 },
 ];
 
+export type MockNotificationType = "badge" | "content" | "tutorial" | "alert" | "system";
+
+export type MockNotification = {
+  id: string;
+  type: MockNotificationType;
+  title: string;
+  time: string;
+  avatar: "Brain" | "FileText" | "BookOpen" | "AlertTriangle" | "Award" | "Mail";
+};
+
+export const MOCK_NOTIFICATIONS: MockNotification[] = [
+  {
+    id: "n1",
+    type: "badge",
+    title: "AI & ML mastery badge earned",
+    time: "3 min ago",
+    avatar: "Brain",
+  },
+  {
+    id: "n2",
+    type: "content",
+    title: "New article: GPT-5 Technical Report",
+    time: "15 min ago",
+    avatar: "FileText",
+  },
+  {
+    id: "n3",
+    type: "tutorial",
+    title: "DeFi tutorial — Module 4 unlocked",
+    time: "1 hour ago",
+    avatar: "BookOpen",
+  },
+  {
+    id: "n4",
+    type: "alert",
+    title: "EU AI Act enforcement update",
+    time: "2 hours ago",
+    avatar: "AlertTriangle",
+  },
+  {
+    id: "n5",
+    type: "badge",
+    title: "Blockchain Fundamentals step completed",
+    time: "3 hours ago",
+    avatar: "Award",
+  },
+  {
+    id: "n6",
+    type: "system",
+    title: "Weekly learning digest ready",
+    time: "5 hours ago",
+    avatar: "Mail",
+  },
+];
+
 export type BadgeStepStatus = "completed" | "active" | "locked";
 
 export type BadgeStep = { label: string; status: BadgeStepStatus };
