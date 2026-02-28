@@ -90,3 +90,39 @@ export type SeedItem = {
   date?: string;
   embedding?: number[]; // Optional; ai/ adds these
 };
+
+// --- Dashboard data ---
+export type DashboardTutorial = {
+  id: string;
+  title: string;
+  slug: string;
+  currentModule: number;
+  totalModules: number;
+  progress: number; // 0-100
+  estimatedHours: number;
+  lastReadAt: string; // ISO 8601
+};
+
+export type DashboardAlert = {
+  id: string;
+  title: string;
+  severity: "info" | "success" | "warning" | "danger";
+  time: string;
+  read: boolean;
+};
+
+export type DailyActivity = {
+  day: string; // Mon, Tue, ...
+  minutesRead: number;
+  articlesRead: number;
+  quizzesCompleted: number;
+};
+
+export type CategoryEngagement = {
+  id: string; // e.g. "ai", "defi"
+  categoryId: string; // e.g. "No.101" — displayed on block
+  label: string; // e.g. "AI & ML"
+  totalMinutes: number; // drives block size (not shown, only affects size)
+  quizzesDone: number;
+  articlesRead: number;
+};

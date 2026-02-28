@@ -28,11 +28,15 @@ type Props = {
   onBack: () => void;
 };
 
+const MAX_INTERESTS = 3;
+
 export default function InterestsStep({ value, onChange, onNext, onBack }: Props) {
+  const atLimit = value.length >= MAX_INTERESTS;
+
   function toggle(interest: string) {
     if (value.includes(interest)) {
       onChange(value.filter((i) => i !== interest));
-    } else {
+    } else if (!atLimit) {
       onChange([...value, interest]);
     }
   }
@@ -43,7 +47,7 @@ export default function InterestsStep({ value, onChange, onNext, onBack }: Props
         What topics interest you?
       </h2>
       <p className="mt-3 text-base text-white/40">
-        Select at least one. We&apos;ll use these to curate your content feed and learning paths.
+        Select up to {MAX_INTERESTS} topics. We&apos;ll use these to curate your content feed and learning paths.
       </p>
 
       <div className="mt-10 flex flex-wrap gap-3">
@@ -54,12 +58,15 @@ export default function InterestsStep({ value, onChange, onNext, onBack }: Props
               key={interest}
               type="button"
               onClick={() => toggle(interest)}
+              disabled={!isSelected && atLimit}
               className={`
                 inline-flex items-center gap-2 border px-4 py-2.5 text-sm font-medium transition-all duration-200
                 ${
                   isSelected
                     ? "border-[#2b6cb0]/50 bg-[#2b6cb0]/10 text-white"
-                    : "border-white/[0.08] bg-white/[0.02] text-white/50 hover:border-white/[0.16] hover:text-white/70"
+                    : atLimit
+                      ? "border-white/[0.04] bg-white/[0.01] text-white/20 cursor-not-allowed"
+                      : "border-white/[0.08] bg-white/[0.02] text-white/50 hover:border-white/[0.16] hover:text-white/70"
                 }
               `}
             >
@@ -72,7 +79,7 @@ export default function InterestsStep({ value, onChange, onNext, onBack }: Props
 
       {value.length > 0 && (
         <p className="mt-4 text-xs text-white/25">
-          {value.length} selected
+          {value.length} / {MAX_INTERESTS} selected
         </p>
       )}
 
