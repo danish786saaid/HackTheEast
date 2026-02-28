@@ -17,7 +17,9 @@ let _itemsCache = null;
 
 function loadItems() {
   if (_itemsCache) return _itemsCache;
-  _itemsCache = require(path.join(__dirname, "items_with_embeddings.json"));
+  const fs = require("fs");
+  const filePath = path.join(process.cwd(), "ai", "items_with_embeddings.json");
+  _itemsCache = JSON.parse(fs.readFileSync(filePath, "utf-8"));
   return _itemsCache;
 }
 

@@ -9,7 +9,7 @@ const fs = require("fs");
 const path = require("path");
 
 const SYSTEM_PROMPT = fs
-  .readFileSync(path.join(__dirname, "prompt.txt"), "utf-8")
+  .readFileSync(path.join(process.cwd(), "ai", "prompt.txt"), "utf-8")
   .trim();
 
 const MINIMAX_API_KEY = process.env.MINIMAX_API_KEY || "";
@@ -19,7 +19,8 @@ let _cannedCache = null;
 
 function loadCanned() {
   if (_cannedCache) return _cannedCache;
-  _cannedCache = require(path.join(__dirname, "canned_outputs.json"));
+  const filePath = path.join(process.cwd(), "ai", "canned_outputs.json");
+  _cannedCache = JSON.parse(fs.readFileSync(filePath, "utf-8"));
   return _cannedCache;
 }
 
