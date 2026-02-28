@@ -19,10 +19,11 @@ import { useAuth, initials } from "@/lib/auth-context";
 import { MOCK_NOTIFICATIONS, type MockNotification, type MockNotificationType } from "@/lib/constants";
 
 const navItems = [
-  { label: "Dashboard", href: "/dashboard" },
+  { label: "Dashboard", href: "/" },
   { label: "Tutorials", href: "/tutorials" },
   { label: "Badges", href: "/badges" },
   { label: "News", href: "/news" },
+  { label: "About Us", href: "/about" },
 ];
 
 export default function TopBar() {
@@ -65,8 +66,8 @@ export default function TopBar() {
     router.refresh();
   }
 
-  const displayName = user?.name ?? "Guest";
-  const initialsStr = user ? initials(user.name) : "G";
+  const displayName = user?.name ?? "Sign in";
+  const initialsStr = user ? initials(user.name) : "?";
 
   const typeStyles: Record<
     MockNotificationType,
@@ -245,21 +246,34 @@ export default function TopBar() {
 
             {userMenuOpen && (
               <div className="absolute right-0 top-full mt-1 w-48 border border-white/[0.08] bg-[#1c1917] py-1 shadow-xl z-50">
-                <a
-                  href="/settings"
-                  className="flex w-full items-center gap-2 px-4 py-2.5 text-sm text-[#a8a29e] hover:bg-white/[0.06] hover:text-white transition-colors"
-                >
-                  <Settings className="h-4 w-4" />
-                  Settings
-                </a>
-                <button
-                  type="button"
-                  onClick={handleLogout}
-                  className="flex w-full items-center gap-2 px-4 py-2.5 text-sm text-[#a8a29e] hover:bg-white/[0.06] hover:text-white transition-colors"
-                >
-                  <LogOut className="h-4 w-4" />
-                  Log out
-                </button>
+                {user ? (
+                  <>
+                    <Link
+                      href="/settings"
+                      onClick={() => setUserMenuOpen(false)}
+                      className="flex w-full items-center gap-2 px-4 py-2.5 text-sm text-[#a8a29e] hover:bg-white/[0.06] hover:text-white transition-colors"
+                    >
+                      <Settings className="h-4 w-4" />
+                      Settings
+                    </Link>
+                    <button
+                      type="button"
+                      onClick={handleLogout}
+                      className="flex w-full items-center gap-2 px-4 py-2.5 text-sm text-[#a8a29e] hover:bg-white/[0.06] hover:text-white transition-colors"
+                    >
+                      <LogOut className="h-4 w-4" />
+                      Log out
+                    </button>
+                  </>
+                ) : (
+                  <Link
+                    href="/onboarding/login"
+                    className="flex w-full items-center gap-2 px-4 py-2.5 text-sm text-[#a8a29e] hover:bg-white/[0.06] hover:text-white transition-colors"
+                    onClick={() => setUserMenuOpen(false)}
+                  >
+                    Sign in
+                  </Link>
+                )}
               </div>
             )}
           </div>

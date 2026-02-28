@@ -4,6 +4,8 @@ import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import TopBar from "@/components/layout/TopBar";
 import { ArrowLeft, ExternalLink, Clock, Loader2, User, Bookmark } from "lucide-react";
+import { recordArticleRead } from "@/lib/articles-read";
+import { useAuth } from "@/lib/auth-context";
 
 type Article = {
   title: string;
@@ -61,6 +63,7 @@ function formatContent(raw: string): string[] {
 export default function ArticlePage() {
   const params = useParams();
   const router = useRouter();
+  const { user } = useAuth();
   const [article, setArticle] = useState<Article | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -76,6 +79,20 @@ export default function ArticlePage() {
     }
     setLoading(false);
   }, [params?.slug]);
+
+  useEffect(() => {
+    if (!params?.slug || !user?.id) return;
+    const slug = String(params.slug);
+    const dedupeKey = `article-read-lock:${user.id}:${slug}`;
+    const now = Date.now();
+    const last = Number(sessionStorage.getItem(dedupeKey) || "0");
+
+    // Prevent React StrictMode dev double-effect from recording twice.
+    if (now - last < 3000) return;
+
+    sessionStorage.setItem(dedupeKey, String(now));
+    void recordArticleRead(user.id, slug);
+  }, [params?.slug, user?.id]);
 
   if (loading) {
     return (

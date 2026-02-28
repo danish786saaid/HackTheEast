@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback, useRef } from "react";
 import { useParams, useRouter } from "next/navigation";
 import TopBar from "@/components/layout/TopBar";
 import { MOCK_TUTORIALS } from "@/lib/constants";
+import { useTutorialProgress } from "@/contexts/TutorialProgressContext";
 import {
   ArrowLeft,
   BookOpen,
@@ -61,11 +62,14 @@ const statusMessages: Record<string, string> = {
   error: "Something went wrong.",
 };
 
+const PROGRESS_DEBOUNCE_MS = 500;
+
 export default function TutorialDetailPage() {
   const params = useParams();
   const router = useRouter();
-  const id = params?.id as string;
+  const id = (params?.id ?? "") as string;
   const tutorial = MOCK_TUTORIALS.find((t) => t.id === id);
+  const { getProgress, updateProgress, progress } = useTutorialProgress();
 
   const [videoUrl, setVideoUrl] = useState<string | null>(null);
   const [genStatus, setGenStatus] = useState<GenStatus>("idle");
@@ -74,6 +78,8 @@ export default function TutorialDetailPage() {
   const [isSaved, setIsSaved] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const videoRef = useRef<HTMLVideoElement | null>(null);
+  const progressDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     if (!tutorial) return;
@@ -187,6 +193,47 @@ export default function TutorialDetailPage() {
     }
   };
 
+  const handleVideoTimeUpdate = useCallback(() => {
+    const video = videoRef.current;
+    if (!video || !tutorial || !video.duration || !isFinite(video.duration))
+      return;
+    const percent = Math.min(100, (video.currentTime / video.duration) * 100);
+    const durationSec = Math.round(video.duration);
+    if (progressDebounceRef.current) clearTimeout(progressDebounceRef.current);
+    progressDebounceRef.current = setTimeout(() => {
+      updateProgress(tutorial.id, Math.round(percent), durationSec);
+      progressDebounceRef.current = null;
+    }, PROGRESS_DEBOUNCE_MS);
+  }, [tutorial, updateProgress]);
+
+  const handleVideoEnded = useCallback(() => {
+    const video = videoRef.current;
+    const durationSec = video?.duration && isFinite(video.duration)
+      ? Math.round(video.duration)
+      : undefined;
+    if (progressDebounceRef.current) clearTimeout(progressDebounceRef.current);
+    if (tutorial) updateProgress(tutorial.id, 100, durationSec);
+  }, [tutorial, updateProgress]);
+
+  const handleLoadedMetadata = useCallback(() => {
+    const video = videoRef.current;
+    if (!video || !tutorial || !video.duration || !isFinite(video.duration))
+      return;
+    const durationSec = Math.round(video.duration);
+    const currentPct =
+      progress[tutorial.id]?.watchedPercent ?? getProgress(tutorial.id);
+    updateProgress(tutorial.id, currentPct, durationSec);
+  }, [tutorial, getProgress, progress, updateProgress]);
+
+  useEffect(() => {
+    return () => {
+      if (progressDebounceRef.current)
+        clearTimeout(progressDebounceRef.current);
+    };
+  }, []);
+
+  const watchedPercent = tutorial ? getProgress(tutorial.id) : 0;
+
   if (!tutorial) {
     return (
       <>
@@ -223,11 +270,16 @@ export default function TutorialDetailPage() {
             <div className="relative aspect-video w-full overflow-hidden bg-[#141211] border border-white/[0.06]">
               {videoUrl && genStatus === "Success" ? (
                 <video
+                  ref={videoRef}
                   src={videoUrl}
                   controls
                   autoPlay
                   className="h-full w-full object-contain"
                   playsInline
+                  onLoadedMetadata={handleLoadedMetadata}
+                  onDurationChange={handleLoadedMetadata}
+                  onTimeUpdate={handleVideoTimeUpdate}
+                  onEnded={handleVideoEnded}
                 />
               ) : (
                 <div className="absolute inset-0">
@@ -394,6 +446,21 @@ export default function TutorialDetailPage() {
                     {tutorial.level} difficulty level
                   </li>
                 </ul>
+              </div>
+
+              <div className="mt-6 border-t border-gray-200 pt-5">
+                <h2 className="text-sm font-semibold text-gray-900">
+                  Your progress
+                </h2>
+                <p className="mt-1 text-xs text-gray-500">
+                  You&apos;ve watched {watchedPercent}% of this tutorial
+                </p>
+                <div className="mt-2 h-1.5 w-full overflow-hidden rounded bg-gray-100">
+                  <div
+                    className="h-full bg-[#3b82f6] transition-all duration-500"
+                    style={{ width: `${watchedPercent}%` }}
+                  />
+                </div>
               </div>
 
               {!videoUrl && genStatus === "idle" && (
