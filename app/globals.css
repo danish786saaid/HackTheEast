@@ -92,6 +92,103 @@ body {
   align-content: start;
 }
 
+/* ---------- Dashboard / Settings two-panel layout ---------- */
+.panel-white {
+  @apply bg-white text-gray-900;
+  box-shadow: 2px 0 24px rgba(0, 0, 0, 0.06);
+}
+
+/* ---------- Warm design-system (settings page) ---------- */
+.settings-page {
+  background: #f5f0e8;
+  color: #1a1a1a;
+  min-height: 100vh;
+}
+
+.ds-card {
+  @apply rounded-2xl border bg-white;
+  border-color: #e8e2d8;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+}
+
+.ds-card-hover:hover {
+  border-color: #d4cdc2;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.ds-btn-primary {
+  @apply inline-flex items-center justify-center rounded-full font-semibold transition-all;
+  background: #1a1a1a;
+  color: #fff;
+}
+.ds-btn-primary:hover {
+  background: #333;
+}
+
+.ds-btn-secondary {
+  @apply inline-flex items-center justify-center rounded-full border font-semibold transition-all;
+  background: #fff;
+  border-color: #d4cdc2;
+  color: #1a1a1a;
+}
+.ds-btn-secondary:hover {
+  background: #f5f0e8;
+  border-color: #c4bdb2;
+}
+
+.ds-chip {
+  @apply inline-flex items-center rounded-full border text-xs font-medium transition-all;
+  border-color: #d4cdc2;
+  color: #5a5550;
+  background: #fff;
+}
+.ds-chip:hover {
+  border-color: #b8b0a4;
+  background: #faf7f2;
+}
+.ds-chip-active {
+  background: #1a1a1a !important;
+  border-color: #1a1a1a !important;
+  color: #fff !important;
+}
+
+.ds-toggle {
+  @apply relative shrink-0 rounded-full transition-colors;
+  background: #d4cdc2;
+}
+.ds-toggle-on {
+  background: #1a1a1a;
+}
+
+.ds-section-title {
+  @apply text-[13px] font-semibold uppercase tracking-wide;
+  color: #1a1a1a;
+}
+
+.ds-muted {
+  color: #8a8580;
+}
+
+.ds-divider {
+  border-color: #e8e2d8;
+}
+
+.ds-accent {
+  color: #e87461;
+}
+
+.dither-dots {
+  background-image: radial-gradient(circle at 1px 1px, rgba(255, 255, 255, 0.04) 1px, transparent 0);
+  background-size: 24px 24px;
+}
+
+.topo-grid {
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+  background-size: 48px 48px;
+}
+
 /* ---------- Scrollbar ---------- */
 ::-webkit-scrollbar {
   width: 6px;
