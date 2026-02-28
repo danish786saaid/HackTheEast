@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import GlowWord from "../GlowWord";
 
@@ -55,6 +56,13 @@ export default function WelcomeStep({ onNext }: Props) {
           Get started
           <ArrowRight className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-1" />
         </button>
+
+        <Link
+          href="/onboarding/login"
+          className="mt-4 inline-block text-sm font-medium text-white/60 transition-colors hover:text-white"
+        >
+          Login
+        </Link>
 
         <p className="mt-6 text-xs text-white/20">
           Your preferences can be changed later in settings.

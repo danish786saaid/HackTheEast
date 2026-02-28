@@ -63,15 +63,6 @@ export default function RegisterPage() {
     }
   }, [signInWithOAuth]);
 
-  const handleApple = useCallback(async () => {
-    setError(null);
-    try {
-      await signInWithOAuth("apple");
-    } catch (err) {
-      setError((err as Error).message);
-    }
-  }, [signInWithOAuth]);
-
   return (
     <AuthPageLayout
       title="Get Started with Us"
@@ -86,20 +77,13 @@ export default function RegisterPage() {
         Enter your personal data to create your account.
       </p>
 
-      <div className="mt-8 flex gap-3">
+      <div className="mt-8">
         <button
           type="button"
           onClick={handleGoogle}
-          className="flex-1 border border-[var(--glass-border)] bg-white/[0.04] py-3 px-4 text-sm font-medium text-white rounded-none transition-colors hover:border-white/[0.12] hover:bg-white/[0.06]"
+          className="w-full border border-[var(--glass-border)] bg-white/[0.04] py-3 px-4 text-sm font-medium text-white rounded-none transition-colors hover:border-white/[0.12] hover:bg-white/[0.06]"
         >
           Google
-        </button>
-        <button
-          type="button"
-          onClick={handleApple}
-          className="flex-1 border border-[var(--glass-border)] bg-white/[0.04] py-3 px-4 text-sm font-medium text-white rounded-none transition-colors hover:border-white/[0.12] hover:bg-white/[0.06]"
-        >
-          Apple
         </button>
       </div>
 
