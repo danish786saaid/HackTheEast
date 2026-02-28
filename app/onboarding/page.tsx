@@ -16,12 +16,20 @@ export default function OnboardingPage() {
   const router = useRouter();
   const {
     user,
+    onboardingComplete,
     isAuthenticated,
     completeOnboarding,
     saveOnboardingPrefs,
   } = useAuth();
 
   const [step, setStep] = useState(0);
+
+  // Signed-in users who already completed onboarding go straight to dashboard
+  useEffect(() => {
+    if (user && onboardingComplete) {
+      router.replace("/");
+    }
+  }, [user, onboardingComplete, router]);
   const [profileType, setProfileType] = useState<ProfileType | null>(null);
   const [interests, setInterests] = useState<string[]>([]);
   const [experienceLevel, setExperienceLevel] = useState<ExperienceLevel | null>(null);
