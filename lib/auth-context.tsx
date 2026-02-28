@@ -16,6 +16,7 @@ export type User = {
   name: string;
   email: string;
   handle: string;
+  avatarUrl?: string;
 };
 
 type StoredAuth = {
@@ -31,6 +32,7 @@ type AuthContextValue = {
   register: (name: string, email: string, password: string) => Promise<void>;
   logout: () => void;
   completeOnboarding: () => void;
+  updateProfile: (updates: Partial<Pick<User, "name" | "email" | "handle" | "avatarUrl">>) => void;
 };
 
 const AuthContext = createContext<AuthContextValue | null>(null);
@@ -137,6 +139,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     saveStored({ user, onboardingComplete: true });
   }, [user]);
 
+  const updateProfile = useCallback(
+    (updates: Partial<Pick<User, "name" | "email" | "handle" | "avatarUrl">>) => {
+      if (!user) return;
+      const next = { ...user, ...updates };
+      setUser(next);
+      saveStored({ user: next, onboardingComplete });
+    },
+    [user, onboardingComplete]
+  );
+
   const value: AuthContextValue = {
     user,
     isAuthenticated: !!user,
@@ -145,6 +157,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     register,
     logout,
     completeOnboarding,
+    updateProfile,
   };
 
   if (!hydrated) {
