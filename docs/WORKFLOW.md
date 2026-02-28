@@ -5,27 +5,51 @@
 ```
 main (stable, deployable)
   │
-  └── integration (merge target)
+  └── integration (merge target for parent branches)
         │
-        ├── frontend-app  — FE: UI, Notifs, audio playback, demo recording
-        ├── backend-app   — BE: APIs, seed loader, badge signing
-        └── ai-ml         — ML: embeddings, canned outputs, MiniMax prompts
+        ├── frontend-app (parent)
+        │     ├── frontend/dashboard
+        │     ├── frontend/tutorials
+        │     ├── frontend/news-illustrator
+        │     └── frontend/onboarding
+        │
+        ├── backend-app (parent)
+        │     ├── backend/exa-integration
+        │     ├── backend/minimax-integration
+        │     └── backend/content-pipeline
+        │
+        └── ai-ml (parent)
 ```
 
 ## Merge flow
 
-1. **Feature branches** (`frontend/`, `backend/`, `ai/`) merge into **`integration`**
-2. When `integration` is stable, merge **`integration`** → **`main`**
-3. Never merge feature branches directly into `main`
+1. **Sub-branches** merge into their **parent** (e.g. `frontend/dashboard` → `frontend-app`)
+2. **Parent branches** merge into **`integration`** (e.g. `frontend-app` → `integration`)
+3. When `integration` is stable, merge **`integration`** → **`main`**
+4. Never merge sub-branches directly into `integration` or `main`
 
 ## Role assignments (4 people)
 
-| Role | Branch | Primary tasks |
-|------|--------|---------------|
-| **FE** | `frontend-app` | Goal input, Generate Path button, path display, Claim Badge, Notifs panel, audio playback |
-| **BE** | `backend-app` | `/api/retrieve`, `/api/generate_path`, `/api/claim_badge`, `/api/verify_badge`, seed loader, HMAC signing |
-| **ML** | `ai-ml` | `items_with_embeddings.json`, `canned_outputs.json`, MiniMax prompt, fallback MP3 |
+| Role | Parent branch | Sub-branches |
+|------|---------------|--------------|
+| **FE** | `frontend-app` | `frontend/dashboard`, `frontend/tutorials`, `frontend/news-illustrator`, `frontend/onboarding` |
+| **BE** | `backend-app` | `backend/exa-integration`, `backend/minimax-integration`, `backend/content-pipeline` |
+| **ML** | `ai-ml` | (single branch) |
 | **PD** | — | Demo script, slides, fallback video, acceptance tests, final merge |
+
+## Getting started
+
+```bash
+git checkout integration
+git pull
+git checkout frontend-app
+git pull
+git checkout -b frontend/dashboard   # or frontend/tutorials, etc.
+# Work, commit, push
+# Open PR into frontend-app (not integration)
+```
+
+When your parent has all sub-branches merged, open PR: `frontend-app` → `integration`.
 
 ## API contracts (on main)
 
@@ -38,13 +62,3 @@ All branches use these. Frontend calls them; backend implements.
 
 Types: `lib/types.ts`  
 Stubs: `lib/api-stubs.js` (backend replaces with real logic)
-
-## Getting started
-
-```bash
-git checkout integration
-git pull
-git checkout -b frontend-app   # or backend-app or ai-ml
-# Work, commit, push
-# Open PR into integration
-```
