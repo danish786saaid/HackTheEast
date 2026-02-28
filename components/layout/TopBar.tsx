@@ -7,7 +7,7 @@ import { Search, Bell, Settings, BookOpen, LogOut } from "lucide-react";
 import { useAuth, initials } from "@/lib/auth-context";
 
 const navItems = [
-  { label: "Dashboard", href: "/dashboard" },
+  { label: "Dashboard", href: "/" },
   { label: "Notifs", href: "/notifs" },
 ];
 
@@ -31,7 +31,7 @@ export default function TopBar() {
   function handleLogout() {
     logout();
     setUserMenuOpen(false);
-    router.push("/");
+    router.push("/onboarding/login");
     router.refresh();
   }
 
@@ -43,7 +43,7 @@ export default function TopBar() {
     <header className="sticky top-0 z-50 border-b border-white/[0.06]" style={{ background: "rgba(12, 10, 9, 0.85)", backdropFilter: "blur(40px) saturate(1.4)", WebkitBackdropFilter: "blur(40px) saturate(1.4)" }}>
       <div className="mx-auto flex h-16 max-w-[1440px] items-center justify-between px-8">
         <div className="flex items-center gap-10">
-          <Link href="/dashboard" className="flex items-center gap-2.5">
+          <Link href="/" className="flex items-center gap-2.5">
             <div className="flex h-8 w-8 items-center justify-center rounded-lg" style={{ background: "linear-gradient(135deg, #ea580c, #f59e0b)" }}>
               <BookOpen className="h-4 w-4 text-white" />
             </div>

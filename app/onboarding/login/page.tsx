@@ -15,7 +15,7 @@ const STEPS = [
 
 export default function LoginPage() {
   const router = useRouter();
-  const { user, login, signInWithOAuth } = useAuth();
+  const { user, onboardingComplete, login, signInWithOAuth } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -25,8 +25,9 @@ export default function LoginPage() {
   // Redirect if already authenticated
   useEffect(() => {
     if (!user) return;
-    router.replace("/dashboard");
-  }, [user, router]);
+    if (onboardingComplete) router.replace("/");
+    else router.replace("/onboarding");
+  }, [user, onboardingComplete, router]);
 
   const handleSubmit = useCallback(
     async (e: React.FormEvent) => {
@@ -35,20 +36,30 @@ export default function LoginPage() {
       setLoading(true);
       try {
         await login(email.trim(), password);
-        router.replace("/dashboard");
+        if (onboardingComplete) router.replace("/");
+        else router.replace("/onboarding");
       } catch (err) {
         setError((err as Error).message);
       } finally {
         setLoading(false);
       }
     },
-    [email, password, login, router]
+    [email, password, login, onboardingComplete, router]
   );
 
   const handleGoogle = useCallback(async () => {
     setError(null);
     try {
       await signInWithOAuth("google");
+    } catch (err) {
+      setError((err as Error).message);
+    }
+  }, [signInWithOAuth]);
+
+  const handleApple = useCallback(async () => {
+    setError(null);
+    try {
+      await signInWithOAuth("apple");
     } catch (err) {
       setError((err as Error).message);
     }
@@ -68,13 +79,20 @@ export default function LoginPage() {
         Enter your credentials to access your account.
       </p>
 
-      <div className="mt-8">
+      <div className="mt-8 flex gap-3">
         <button
           type="button"
           onClick={handleGoogle}
-          className="w-full border border-[var(--glass-border)] bg-white/[0.04] py-3 px-4 text-sm font-medium text-white rounded-none transition-colors hover:border-white/[0.12] hover:bg-white/[0.06]"
+          className="flex-1 border border-[var(--glass-border)] bg-white/[0.04] py-3 px-4 text-sm font-medium text-white rounded-none transition-colors hover:border-white/[0.12] hover:bg-white/[0.06]"
         >
           Google
+        </button>
+        <button
+          type="button"
+          onClick={handleApple}
+          className="flex-1 border border-[var(--glass-border)] bg-white/[0.04] py-3 px-4 text-sm font-medium text-white rounded-none transition-colors hover:border-white/[0.12] hover:bg-white/[0.06]"
+        >
+          Apple
         </button>
       </div>
 
@@ -94,7 +112,7 @@ export default function LoginPage() {
             placeholder="eg. johnfrans@gmail.com"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="w-full border border-[var(--glass-border)] bg-white/[0.04] py-2.5 px-3 text-sm text-white placeholder-[var(--text-muted)] rounded-none focus:border-[#2b6cb0]/40 focus:outline-none"
+            className="w-full border border-[var(--glass-border)] bg-white/[0.04] py-2.5 px-3 text-sm text-white placeholder-[var(--text-muted)] rounded-none focus:border-[var(--accent)]/40 focus:outline-none"
             required
           />
         </div>
@@ -108,7 +126,7 @@ export default function LoginPage() {
               placeholder="Enter your password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full border border-[var(--glass-border)] bg-white/[0.04] py-2.5 pl-3 pr-10 text-sm text-white placeholder-[var(--text-muted)] rounded-none focus:border-[#2b6cb0]/40 focus:outline-none"
+              className="w-full border border-[var(--glass-border)] bg-white/[0.04] py-2.5 pl-3 pr-10 text-sm text-white placeholder-[var(--text-muted)] rounded-none focus:border-[var(--accent)]/40 focus:outline-none"
               required
             />
             <button

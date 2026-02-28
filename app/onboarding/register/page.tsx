@@ -15,7 +15,7 @@ const STEPS = [
 
 export default function RegisterPage() {
   const router = useRouter();
-  const { user, register: doRegister, signInWithOAuth } = useAuth();
+  const { user, onboardingComplete, register: doRegister, signInWithOAuth } = useAuth();
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
@@ -27,8 +27,9 @@ export default function RegisterPage() {
   // Redirect if already authenticated
   useEffect(() => {
     if (!user) return;
-    router.replace("/dashboard");
-  }, [user, router]);
+    if (onboardingComplete) router.replace("/");
+    else router.replace("/onboarding");
+  }, [user, onboardingComplete, router]);
 
   const handleSubmit = useCallback(
     async (e: React.FormEvent) => {
@@ -42,20 +43,30 @@ export default function RegisterPage() {
       try {
         const name = [firstName.trim(), lastName.trim()].filter(Boolean).join(" ") || "User";
         await doRegister(name, email.trim(), password);
-        router.replace("/dashboard");
+        if (onboardingComplete) router.replace("/");
+        else router.replace("/onboarding");
       } catch (err) {
         setError((err as Error).message);
       } finally {
         setLoading(false);
       }
     },
-    [firstName, lastName, email, password, doRegister, router]
+    [firstName, lastName, email, password, doRegister, onboardingComplete, router]
   );
 
   const handleGoogle = useCallback(async () => {
     setError(null);
     try {
       await signInWithOAuth("google");
+    } catch (err) {
+      setError((err as Error).message);
+    }
+  }, [signInWithOAuth]);
+
+  const handleApple = useCallback(async () => {
+    setError(null);
+    try {
+      await signInWithOAuth("apple");
     } catch (err) {
       setError((err as Error).message);
     }
@@ -75,13 +86,20 @@ export default function RegisterPage() {
         Enter your personal data to create your account.
       </p>
 
-      <div className="mt-8">
+      <div className="mt-8 flex gap-3">
         <button
           type="button"
           onClick={handleGoogle}
-          className="w-full border border-[var(--glass-border)] bg-white/[0.04] py-3 px-4 text-sm font-medium text-white rounded-none transition-colors hover:border-white/[0.12] hover:bg-white/[0.06]"
+          className="flex-1 border border-[var(--glass-border)] bg-white/[0.04] py-3 px-4 text-sm font-medium text-white rounded-none transition-colors hover:border-white/[0.12] hover:bg-white/[0.06]"
         >
           Google
+        </button>
+        <button
+          type="button"
+          onClick={handleApple}
+          className="flex-1 border border-[var(--glass-border)] bg-white/[0.04] py-3 px-4 text-sm font-medium text-white rounded-none transition-colors hover:border-white/[0.12] hover:bg-white/[0.06]"
+        >
+          Apple
         </button>
       </div>
 
@@ -102,7 +120,7 @@ export default function RegisterPage() {
               placeholder="eg. John"
               value={firstName}
               onChange={(e) => setFirstName(e.target.value)}
-              className="w-full border border-[var(--glass-border)] bg-white/[0.04] py-2.5 px-3 text-sm text-white placeholder-[var(--text-muted)] rounded-none focus:border-[#2b6cb0]/40 focus:outline-none"
+              className="w-full border border-[var(--glass-border)] bg-white/[0.04] py-2.5 px-3 text-sm text-white placeholder-[var(--text-muted)] rounded-none focus:border-[var(--accent)]/40 focus:outline-none"
               required
             />
           </div>
@@ -115,7 +133,7 @@ export default function RegisterPage() {
               placeholder="eg. Francisco"
               value={lastName}
               onChange={(e) => setLastName(e.target.value)}
-              className="w-full border border-[var(--glass-border)] bg-white/[0.04] py-2.5 px-3 text-sm text-white placeholder-[var(--text-muted)] rounded-none focus:border-[#2b6cb0]/40 focus:outline-none"
+              className="w-full border border-[var(--glass-border)] bg-white/[0.04] py-2.5 px-3 text-sm text-white placeholder-[var(--text-muted)] rounded-none focus:border-[var(--accent)]/40 focus:outline-none"
               required
             />
           </div>
@@ -129,7 +147,7 @@ export default function RegisterPage() {
             placeholder="eg. johnfrans@gmail.com"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="w-full border border-[var(--glass-border)] bg-white/[0.04] py-2.5 px-3 text-sm text-white placeholder-[var(--text-muted)] rounded-none focus:border-[#2b6cb0]/40 focus:outline-none"
+            className="w-full border border-[var(--glass-border)] bg-white/[0.04] py-2.5 px-3 text-sm text-white placeholder-[var(--text-muted)] rounded-none focus:border-[var(--accent)]/40 focus:outline-none"
             required
           />
         </div>
@@ -143,7 +161,7 @@ export default function RegisterPage() {
               placeholder="Enter your password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full border border-[var(--glass-border)] bg-white/[0.04] py-2.5 pl-3 pr-10 text-sm text-white placeholder-[var(--text-muted)] rounded-none focus:border-[#2b6cb0]/40 focus:outline-none"
+              className="w-full border border-[var(--glass-border)] bg-white/[0.04] py-2.5 pl-3 pr-10 text-sm text-white placeholder-[var(--text-muted)] rounded-none focus:border-[var(--accent)]/40 focus:outline-none"
               required
               minLength={8}
             />

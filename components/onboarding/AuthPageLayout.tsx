@@ -41,7 +41,7 @@ export default function AuthPageLayout({
             <div
               className="flex h-8 w-8 items-center justify-center rounded-none"
               style={{
-                background: "linear-gradient(135deg, #14345E, #2b6cb0)",
+                background: "linear-gradient(135deg, var(--accent), var(--accent-amber))",
               }}
             >
               <BookOpen className="h-4 w-4 text-white" />
