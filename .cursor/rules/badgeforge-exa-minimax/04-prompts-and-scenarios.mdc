@@ -1,0 +1,42 @@
+---
+description: "Page 4/6 — Prompts and scenarios. Content generation with scenario + style (brain rot vs normal); optional path/catch-up/explain."
+globs: lib/content-pipeline/**/*, pages/api/**/generate_path*, pages/api/**/minimax*
+---
+
+# 4. Prompts and scenarios
+
+## Purpose
+
+Build the right MiniMax prompt so output is **relevant and useful** and shows the user what they are looking for. User picks a **scenario** (what they want) and **style** (brain rot or normal).
+
+## Main flow: Content generation (scenario + style)
+
+- **Scenarios** (see `lib/content-pipeline/scenarios.ts` and `CONTENT_SCENARIOS`): summary, key_points, explain, catch_up, compare, how_to, deep_dive, tldr, debate, q_and_a, timeline, risks_opportunities, for_beginners, next_steps, what_changed, pros_cons.
+- **Style:** `brainrot` (gen-z, meme-y) or `normal` (clear, professional). Each scenario has `systemPromptNormal` and `systemPromptBrainrot`.
+- **API:** `buildContentPayload(userInput, scenarioId, style, items)` → `{ systemPrompt, userMessage }`. Call MiniMax with these; response is plain text content (no JSON).
+- **User message format:** “User request: {userInput}\n\nCurated items (use only these):\n{numbered list}”. Cap at 10 items; use `formatItemsForPrompt` for consistency.
+
+## Rules for scenario prompts
+
+- Every scenario prompt must say: use **only** the curated items provided; no made-up sources. Output plain text, no JSON.
+- Keep prompts in `scenarios.ts` and `prompt-builder.ts`; do not scatter prompt strings in API routes.
+- When adding a scenario: add to `ScenarioId`, add entry to `CONTENT_SCENARIOS` with both normal and brainrot system prompts.
+
+## Optional variants
+
+- **3-step path:** `buildMinimaxPathPayload(goal, items)` → JSON path (for badge flow). Not the default.
+- **Catch me up:** `buildCatchMeUpPayload(goal, items)`.
+- **Explain by role:** `buildExplainByRolePayload(goal, role, items)`.
+
+## Item list format (all variants)
+
+- Curated items in **stable order** (same as after filter/refine). Number them in the user message. Cap at 10. Include user request verbatim plus “Curated items (use only these):” and the list.
+
+## Validation
+
+- If user request is empty or too long (e.g. > 500 chars), truncate or reject before calling MiniMax; document the limit.
+- For path variant: validate path length 3, total minutes ≤ 90; return clear error or fallback if validation fails.
+
+## Prompt (for this section)
+
+“Is the scenario (and style) chosen explicitly? Is the item list formatted with request + numbered items? Are system prompts in prompt-builder/scenarios and output format (plain text vs JSON) documented?”

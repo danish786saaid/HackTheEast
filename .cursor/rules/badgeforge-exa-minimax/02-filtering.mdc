@@ -1,0 +1,61 @@
+---
+description: "Page 2/6 — Filtering. Relevance, recency, domains, content type, dedupe, ordering, maxItems."
+globs: lib/content-pipeline/**/*, pages/api/**/retrieve*, pages/api/**/exa*
+---
+
+# 2. Filtering (relevance, recency, domains, type, dedupe, order)
+
+## Purpose
+
+Keep only relevant, recent, trusted, and well-typed results so MiniMax receives useful content and generates output that matches what the user is looking for.
+
+---
+
+## Relevance
+
+- **Score sources (order of preference):** Exa `score` → Exa `highlightScores` (first or max) → fallback 1 if missing.
+- **`minRelevanceScore`** (default `0.2`): Drop results below this. Tune 0.1–0.5. Normalize Exa to 0–1 if needed.
+- **Rules:** Resolve a numeric score per result before comparing; never compare `undefined`. If Exa returns no scores, skip relevance filter and use other filters only. Allow mapping (e.g. `relevance_score` → score) in types.
+
+---
+
+## Recency
+
+- **`maxAgeDays`** (default `365`): Drop results with `publishedDate` older than this. Use `0` to disable; `90`/`180` for “recent only”.
+- **Recency boost (optional):** `score = similarity + α * recency_score` (0–1 by age). α typically 0.1–0.3.
+- **Date handling:** Prefer `publishedDate`; map `published_date`/`date` in `ExaResult`. Missing date → do not drop; treat as recent or neutral for ranking. Invalid date → treat as missing; do not throw.
+
+---
+
+## Domains
+
+- **`allowDomains`**: Allowed hostnames (e.g. `["arxiv.org", "youtube.com"]`). Empty = allow all. Strip `www.`; case-insensitive.
+- **`blockDomains`**: Blocked hostnames. Apply block before allow.
+- **Hostname:** `new URL(url).hostname`; on parse error drop or apply policy (e.g. drop if allowlist non-empty).
+- **Topic presets:** Optional prefill for “AI ethics”, “crypto regulation”, etc.; document in config.
+
+---
+
+## Content type (Read / Watch / Practice)
+
+- **Inference order:** Watch (youtube, vimeo, twitch, “video”, “watch”) → Practice (github, “tutorial”, “practice”, “exercise”, “hands-on”) → Read (default).
+- **`allowedTypes`** (default all three): Drop results whose inferred type is not in the list.
+- **Rules:** Every result gets exactly one type; fallback Read. Curated item `type` is one of the three literals only.
+
+---
+
+## Deduplication and ordering
+
+- **Dedupe key:** URL (lowercase, optional trailing slash stripped). Keep first occurrence; drop later duplicates.
+- **Sort order:** (1) Relevance score desc, (2) date desc, (3) title or URL for stability. Then take first **maxItems** (default 10).
+- **Rules:** Never send more than 10 items to MiniMax. No padding with empty items. Preserve order in the curated list for the prompt.
+
+---
+
+## Config summary
+
+- `minRelevanceScore`, `maxAgeDays`, `maxItems`, `allowDomains`, `blockDomains`, `allowedTypes`. All in `FilterRulesConfig`; keep configurable.
+
+## Prompt (for this section)
+
+“Are relevance, recency, domain, type, dedupe, and order all applied and documented? Is maxItems enforced? Do we handle missing scores/dates without crashing?”

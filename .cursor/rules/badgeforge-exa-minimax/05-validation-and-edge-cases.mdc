@@ -1,0 +1,41 @@
+---
+description: "Page 5/6 — Validation and edge cases. Min items, empty Exa, malformed data, MiniMax errors, fallbacks."
+globs: lib/content-pipeline/**/*, pages/api/**/retrieve*, pages/api/**/generate_path*, pages/api/**/exa*
+---
+
+# 5. Validation and edge cases
+
+## Purpose
+
+Handle failures and edge cases so the pipeline never crashes and the user gets clear, useful feedback.
+
+## Min items before MiniMax
+
+- Do not call MiniMax if curated items after filter + refine are **fewer than 3**. Return a structured error (e.g. `{ error: "not_enough_content", message: "Not enough relevant content for this goal. Try broadening your goal or relaxing filters." }`). Optionally suggest broadening the goal or relaxing filters.
+- Content generation benefits from at least a few items; 1–2 can be allowed for specific scenarios if documented.
+
+## Empty or missing Exa response
+
+- If Exa returns empty `results` or null/undefined, do not call MiniMax. Return a clear error (e.g. “No results found for your search”).
+- If Exa returns an error (rate limit, 5xx), return the error to the client or trigger a fallback (e.g. cached/seed content) if configured.
+
+## Malformed Exa results
+
+- No `url` or no `title` → drop during filter or refinement; do not throw. Log or count dropped items.
+- Unparseable `publishedDate` → treat as missing (do not drop solely for that).
+- If Exa response structure changes (e.g. results in a different key), map or validate at entry and document in `ExaResult` and this rule set.
+
+## MiniMax rate limits and failures
+
+- On rate limit or timeout, return a clear error to the client. Optionally retry once with backoff; do not retry indefinitely.
+- **Fallback:** When configured, return canned output and set a flag (e.g. `use_canned: true`) so the UI can show “Demo mode” or “Fallback result”.
+
+## Rules
+
+- Never throw uncaught exceptions for business failures (no results, not enough items, MiniMax error). Return structured responses with error codes and messages.
+- Log filter stats (exa_count, after_filter_count, after_refine_count) for debugging; do not log full item bodies or user input in production if PII-sensitive.
+- Document new edge cases (e.g. goal too long, invalid scenario id) here and handle before the MiniMax call.
+
+## Prompt (for this section)
+
+“Do we check for fewer than 3 items before MiniMax? Do we handle empty/malformed Exa without crashing? Do we return structured errors and optional fallback instead of throwing?”

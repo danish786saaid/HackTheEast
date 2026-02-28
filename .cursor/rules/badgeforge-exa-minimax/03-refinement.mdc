@@ -1,0 +1,34 @@
+---
+description: "Page 3/6 — Refinement. Exa result → CuratedItem (title, url, type, description) for MiniMax."
+globs: lib/content-pipeline/**/*, pages/api/**/retrieve*, pages/api/**/generate_path*, pages/api/**/exa*
+---
+
+# 3. Refinement to curated items
+
+## Purpose
+
+Turn each filtered Exa result into a **curated item**: the shape MiniMax expects so generated content is based on clear, consistent inputs.
+
+## Output shape (CuratedItem)
+
+- **title** (string): From Exa `title`. Trim; cap length (e.g. 300 chars).
+- **url** (string): From Exa `url`. Do not modify.
+- **type** (string): One of `"Read"` | `"Watch"` | `"Practice"` from the content-type step.
+- **description** (string): One line only. No newlines. Prefer Exa `summary` → first `highlights` → truncate `text` (e.g. 200 chars + "..."). Fallback: title or "No description".
+
+## Description rules
+
+- Replace newlines and multi-space with single space; trim.
+- No raw HTML or markdown unless the prompt expects it (default: plain text).
+- Keep 150–200 chars so the MiniMax prompt stays within token limits.
+
+## Rules
+
+- Refinement runs **after** all filters and **after** dedupe/sort/maxItems. Input = filtered, ordered Exa results.
+- Every refined item has all four fields non-empty (description may be "No description").
+- If an Exa result has no title or url after filtering, drop it during refinement; do not emit a curated item.
+- Do not add extra fields to CuratedItem unless the prompt template uses them.
+
+## Prompt (for this section)
+
+“Do we output exactly title, url, type, description? Is description one line and length-capped? Do we handle missing summary/highlights/text without crashing?”

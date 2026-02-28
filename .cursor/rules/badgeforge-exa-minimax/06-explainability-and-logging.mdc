@@ -1,0 +1,38 @@
+---
+description: "Page 6/6 — Explainability and logging. Per-item scores, filter stats, demo-safe messages."
+globs: lib/content-pipeline/**/*, pages/api/**/retrieve*, pages/api/**/generate_path*, pages/api/**/exa*
+---
+
+# 6. Explainability and logging
+
+## Purpose
+
+Expose “why this was chosen” so users and judges see relevant, useful content and trust the pipeline. Keep filter stats for debugging and demo.
+
+## Per-item explainability (optional)
+
+- **Fields to return:** `similarity` (or `relevance_score`), `recency_score`. Attach to each curated item in the API response so the UI can show tooltips (e.g. “92% match, published 2 weeks ago”).
+- **Source:** Use the same score used for relevance filtering; use the normalized recency value (0–1) used for ranking. Do not invent new metrics without documenting them.
+- **When to omit:** If you did not compute scores (e.g. Exa returned no score), omit these fields or set to null; do not send fake values.
+
+## Filter stats (recommended)
+
+- **exa_count:** Results from Exa before any filter.
+- **after_filter_count:** Results after all filters and dedupe (before maxItems).
+- **sent_to_minimax:** Curated items actually passed to MiniMax (≤ 10).
+- Return in the API response (e.g. `filter_stats: { exa_count, after_filter_count, sent_to_minimax }`) so the frontend or demo can show “Exa returned 20, we sent 10 to MiniMax”.
+
+## Logging rules
+
+- Log filter stats at info level for each retrieve/generate call; do not log full item bodies or user input in production if they may contain PII.
+- For demo or debugging, log a short summary (e.g. query length, item count) without storing raw content.
+- If MiniMax is called with fallback (canned) output, log that so support can distinguish live vs fallback.
+
+## Demo-safe messages
+
+- Error messages to the client should be user- and judge-friendly: “Not enough relevant content” rather than “Filter returned 2 items”. Keep technical details in logs or behind a debug flag.
+- When using canned output, the response should indicate it (e.g. `use_canned: true`) so the demo can explain “fallback used” if needed.
+
+## Prompt (for this section)
+
+“Do we expose similarity/recency per item when available? Do we return filter_stats? Do we avoid logging PII and use demo-safe error messages?”

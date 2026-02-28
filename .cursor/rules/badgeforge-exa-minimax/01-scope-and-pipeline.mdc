@@ -1,0 +1,39 @@
+---
+description: "Page 1/6 — Scope and pipeline. When rules apply; Exa → filter → refine → user picks scenario + style → MiniMax generates content."
+globs: lib/content-pipeline/**/*, pages/api/**/retrieve*, pages/api/**/generate_path*, pages/api/**/exa*, pages/api/**/minimax*
+---
+
+# 1. Scope and pipeline position
+
+## When these rules apply
+
+- Apply **after** the app has received a response from Exa AI Search (search or contents API).
+- Apply **before** any request is sent to MiniMax.
+- Pipeline: **User query → Exa → [FILTER + REFINE] → user picks scenario + style → MiniMax generates content**.
+
+## Flow (content generation, not 3-step plan)
+
+1. User searches → **Exa** returns raw results.
+2. **Filter** (relevance, recency, domains, type, dedupe, max 10).
+3. **Refine** → curated items `{ title, url, type, description }`.
+4. User picks **scenario** (e.g. summary, key points, catch up) and **style** (brain rot or normal).
+5. **MiniMax** gets scenario-specific prompt + user request + curated items → **generates content** (plain text). No 3-step plan unless you explicitly use the optional path variant.
+
+## What you have at the start (Exa output)
+
+- Raw results: `id`, `title`, `url`, `publishedDate`, `author`, `text`, `highlights`, `highlightScores`, `summary`, `score`, or other fields. Treat missing fields as optional.
+
+## What you must produce before MiniMax
+
+- **Curated items** (max 10): each `title`, `url`, `type` (Read | Watch | Practice), `description` (one line).
+- Optionally: per-item `similarity`, `recency_score`; and `filter_stats` (exa_count, after_filter_count, sent_to_minimax).
+
+## Rules
+
+- Do not send raw Exa results to MiniMax. Always filter and refine first.
+- Do not call MiniMax if after filtering you have fewer than 3 curated items. Return a clear error or suggest broadening the goal.
+- Keep the pipeline stateless: filter config + Exa response + user input. Document new Exa fields in `lib/content-pipeline/types.ts` (`ExaResult`).
+
+## Prompt (for this section)
+
+“Does this code run only after Exa and only before MiniMax? Does it output curated items (and optionally scores/stats)? Does the main flow generate content (scenario + style), not a 3-step plan?”

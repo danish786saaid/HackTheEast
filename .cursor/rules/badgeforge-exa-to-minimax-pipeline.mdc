@@ -1,0 +1,91 @@
+---
+description: Exa search → filters & rules → refinement → MiniMax prompt. Use when building or editing the content pipeline, Exa integration, or MiniMax prompt engineering.
+globs: lib/content-pipeline/**/*, pages/api/**/retrieve*, pages/api/**/generate_path*, pages/api/**/exa*
+---
+
+# BadgeForge: Exa → Filters → MiniMax Prompt Pipeline
+
+## Pipeline overview
+
+1. **User search** (search bar) → query sent to **Exa AI Search**.
+2. **Exa returns** raw results (title, url, publishedDate, text/summary/highlights, etc.).
+3. **Apply filter rules** → keep only relevant, recent, allowed types; drop low-relevance or blocked sources.
+4. **Refine** → normalize each result to **curated item** shape: `{ title, url, type, description }` (one-line description for MiniMax).
+5. **User selects content style** → "brain rot" (gen-z, meme-y) or "normal" (standard, professional).
+6. **Build MiniMax prompt** → inject **user's request** + up to 10 curated items + chosen style; MiniMax **generates content** (not a 3-step plan). Optional: 3-step path still available for badge flow.
+
+## Filter rules (you define and tune)
+
+- **Relevance:** Use Exa’s score/highlightScores or your own threshold; drop results below `minRelevanceScore` (e.g. 0.3).
+- **Recency:** Prefer or require `publishedDate` within last N days (e.g. 90) for “up-to-date” learning; optional recency boost in ranking.
+- **Content type:** Map Exa result to `Read` | `Watch` | `Practice` (article/paper → Read, video → Watch, tutorial/code → Practice). Allow only types the user or app allows.
+- **Domain / source rules:** Allowlist or blocklist domains (e.g. allow *.edu, arxiv.org, youtube.com; block known low-quality or off-topic).
+- **Deduplication:** Same URL or same normalized title → keep one.
+- **Max items:** After ranking, keep at most 10 items for MiniMax (PRD cap).
+
+## Refinement (Exa result → curated item)
+
+Each item sent to MiniMax must have:
+
+- **title** (string): From Exa `title`, trimmed.
+- **url** (string): From Exa `url`.
+- **type** (string): One of `"Read"` | `"Watch"` | `"Practice"` (infer from Exa metadata or URL: e.g. youtube → Watch, arxiv → Read).
+- **description** (string): One-line. Prefer Exa `summary` or first `highlights` entry; fallback to truncate `text` to ~100 chars. No newlines.
+
+Output a **stable order** (e.g. by relevance then recency) so the model sees the best items first.
+
+## MiniMax prompt (PRD — do not change intent)
+
+Use the exact PRD prompt; only the **list of curated items** and **user goal** are variable.
+
+- **Input:** `user_goal` (string) + array of up to 10 curated items `{ title, url, type, description }`.
+- **Prompt template:** See `docs/PRD.md` §6 and `lib/content-pipeline/prompt-builder.ts`. Output must be JSON: `goal`, `path[ { step, item_title, item_url, tldr, minutes } ]`, `rationale`.
+- **Validation:** Path has exactly 3 steps; each step uses an item from the list; total minutes ≤ 90.
+
+## Implementation notes
+
+- Keep filter rules **configurable** (e.g. `lib/content-pipeline/filter-rules.ts` or a config object) so you can tune without changing pipeline logic.
+- Log filter stats (how many Exa results, how many after filters, how many sent to MiniMax) for debugging and demo explainability.
+- If Exa returns fewer than 3 items after filters, either relax rules or return a clear error (“Not enough relevant content for this goal”); do not send empty or tiny lists to MiniMax.
+- When adding new rules (e.g. language, length, or keyword filters), document them in this rule file and in the filter config.
+
+## Optional extensions (simplified)
+
+| Need | What to do |
+|------|------------|
+| **Exa fields different** | Update `ExaResult` in `types.ts` and score logic in `filter-rules.ts` to match your Exa response. |
+| **Stricter domains** | Set `allowDomains` in filter config (e.g. `["arxiv.org", "youtube.com"]`) or add topic-specific blocklists. |
+| **Show "why chosen"** | Return `similarity` and `recency_score` (or your scores) from the retrieve API so the UI can display them. |
+| **Other prompts** | Add more system prompts in `prompt-builder.ts` (e.g. "Explain by role", "Catch me up"); keep same filter + refine pipeline. |
+
+## Examples (what each extension is used for)
+
+### 1. Exa fields different
+
+**Use when:** Your Exa API returns different property names than we assume.
+
+**Example:** Exa returns `relevance_score` and `score` is missing. You’d add `relevance_score?: number` to `ExaResult` and in `filter-rules.ts` use `r.relevance_score ?? r.score` when comparing to `minRelevanceScore`. Same idea if they use `published_date` instead of `publishedDate` — map it in types so the rest of the pipeline stays unchanged.
+
+---
+
+### 2. Stricter domains
+
+**Use when:** You want only trusted sources for “AI / crypto / policy” (e.g. no random blogs).
+
+**Example:** User picks “AI ethics” → you pass `allowDomains: ["arxiv.org", "openai.com", "eff.org", "youtube.com"]` so the feed is only from those hosts. Or block spam: `blockDomains: ["lowquality.com"]`. The filter drops any result whose URL host isn’t allowed or is blocked, so MiniMax only sees high-quality items.
+
+---
+
+### 3. Show “why chosen”
+
+**Use when:** You want the UI to explain why an item is in the path (e.g. “Highly relevant” or “Recent”).
+
+**Example:** Your `/api/retrieve` returns not only `items[]` but also per-item `similarity: 0.92` and `recency_score: 0.8`. The frontend can show a tooltip: “Chosen: 92% match to your goal, published 2 weeks ago.” That’s explainability for judges and users. You’d add these fields to the refine step (or keep them from the filter step) and include them in the API response.
+
+---
+
+### 4. Other prompts
+
+**Use when:** You want a second flow (e.g. “Catch me up” or “Explain like I’m a developer”) without changing filters.
+
+**Example:** Same Exa → filter → refine pipeline, but instead of the 3-step path prompt you call `buildCatchMeUpPrompt(userGoal, items)` which uses a different system prompt: “Summarise these items in 2 minutes of reading; focus on what changed recently.” MiniMax returns a short narrative instead of a path. Or “Explain like I’m a developer” so the summary uses dev-friendly language. One pipeline, multiple prompt variants in `prompt-builder.ts`.
