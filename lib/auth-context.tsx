@@ -8,7 +8,9 @@ import {
   useState,
   type ReactNode,
 } from "react";
-import { supabase } from "./supabaseClient";
+import { createClient } from "./supabase/client";
+
+const supabase = createClient();
 
 // ── Storage keys ─────────────────────────────────────────
 const AUTH_STORAGE_KEY = "edtech-auth";
@@ -179,8 +181,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         if (session?.user) {
           const mapped = mapSupabaseUser(session.user);
           await migrateGuestPrefsIfNeeded(mapped.id);
-          const complete = await hasOnboardingRecord(mapped.id);
-          persist(mapped, complete);
+          persist(mapped, true);
           setHydrated(true);
           return;
         }
@@ -202,8 +203,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         if (session?.user) {
           const mapped = mapSupabaseUser(session.user);
           await migrateGuestPrefsIfNeeded(mapped.id);
-          const complete = await hasOnboardingRecord(mapped.id);
-          persist(mapped, complete);
+          persist(mapped, true);
         } else {
           persist(null, false);
         }
@@ -223,7 +223,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const { error } = await supabase.auth.signInWithOAuth({
         provider,
         options: {
-          redirectTo: `${window.location.origin}/onboarding`,
+          redirectTo: `${window.location.origin}/auth/callback?next=/dashboard`,
         },
       });
       if (error) throw new Error(error.message);
@@ -240,7 +240,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const { error } = await supabase.auth.signInWithOtp({
       email,
       options: {
-        emailRedirectTo: `${window.location.origin}/onboarding`,
+        emailRedirectTo: `${window.location.origin}/auth/callback?next=/dashboard`,
       },
     });
     if (error) throw new Error(error.message);

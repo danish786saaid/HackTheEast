@@ -2,23 +2,23 @@
 
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
-import OnboardingFlow from "@/components/onboarding/OnboardingFlow";
 import { useAuth } from "@/lib/auth-context";
 
 export default function OnboardingPage() {
   const router = useRouter();
-  const { user, onboardingComplete } = useAuth();
+  const { user, isAuthenticated } = useAuth();
 
-  // Signed-in users who already completed onboarding go straight to dashboard
   useEffect(() => {
-    if (user && onboardingComplete) {
+    if (isAuthenticated && user) {
       router.replace("/dashboard");
+    } else {
+      router.replace("/onboarding/register");
     }
-  }, [user, onboardingComplete, router]);
+  }, [isAuthenticated, user, router]);
 
-  if (user && onboardingComplete) {
-    return null;
-  }
-
-  return <OnboardingFlow redirectOnComplete="/dashboard" />;
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-[#0c0a09]">
+      <div className="h-8 w-8 animate-pulse rounded-lg bg-white/10" />
+    </div>
+  );
 }

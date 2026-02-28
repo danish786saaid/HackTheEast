@@ -15,7 +15,7 @@ const STEPS = [
 
 export default function RegisterPage() {
   const router = useRouter();
-  const { user, onboardingComplete, register: doRegister, signInWithOAuth } = useAuth();
+  const { user, register: doRegister, signInWithOAuth } = useAuth();
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
@@ -27,9 +27,8 @@ export default function RegisterPage() {
   // Redirect if already authenticated
   useEffect(() => {
     if (!user) return;
-    if (onboardingComplete) router.replace("/dashboard");
-    else router.replace("/");
-  }, [user, onboardingComplete, router]);
+    router.replace("/dashboard");
+  }, [user, router]);
 
   const handleSubmit = useCallback(
     async (e: React.FormEvent) => {
@@ -43,7 +42,7 @@ export default function RegisterPage() {
       try {
         const name = [firstName.trim(), lastName.trim()].filter(Boolean).join(" ") || "User";
         await doRegister(name, email.trim(), password);
-        router.replace("/");
+        router.replace("/dashboard");
       } catch (err) {
         setError((err as Error).message);
       } finally {

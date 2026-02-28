@@ -15,7 +15,7 @@ const STEPS = [
 
 export default function LoginPage() {
   const router = useRouter();
-  const { user, onboardingComplete, login, signInWithOAuth } = useAuth();
+  const { user, login, signInWithOAuth } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -25,9 +25,8 @@ export default function LoginPage() {
   // Redirect if already authenticated
   useEffect(() => {
     if (!user) return;
-    if (onboardingComplete) router.replace("/dashboard");
-    else router.replace("/");
-  }, [user, onboardingComplete, router]);
+    router.replace("/dashboard");
+  }, [user, router]);
 
   const handleSubmit = useCallback(
     async (e: React.FormEvent) => {
@@ -36,7 +35,7 @@ export default function LoginPage() {
       setLoading(true);
       try {
         await login(email.trim(), password);
-        router.replace("/");
+        router.replace("/dashboard");
       } catch (err) {
         setError((err as Error).message);
       } finally {
