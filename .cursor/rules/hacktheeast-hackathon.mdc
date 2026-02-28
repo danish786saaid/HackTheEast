@@ -5,15 +5,25 @@ alwaysApply: true
 
 # HackTheEast – Agent Context
 
-## Target track: OAX Foundation AI EdTech Platform (HKD 15,000)
+## Target tracks (one product, three prizes)
 
-**Problem:** In fast-moving fields (AI, crypto, geopolitics), content overload makes it nearly impossible to discover, filter, and absorb the most relevant materials without wasting time on outdated or irrelevant sources.
+### OAX Foundation AI EdTech Platform (HKD 15,000)
+**Problem:** Content overload in fast-moving fields (AI, crypto, geopolitics) — impossible to filter and absorb relevant material.
+**Criteria:** Real-world learner impact · Timesaving & learning acceleration · Personalisation · Creative thinking
 
-**Our solution — LearnPulse:** An AI-powered EdTech platform with intelligent curation, adaptive learning paths, and a "Catch me up" feature that summarises what changed in your tracked domains.
+### MiniMax Creative Usage (HKD 15,000)
+**Must use:** MiniMax API (LLM, video, audio, music). Multiple MiniMax tools working together for creative experiences.
+**Our use:** Tutorial generation (LLM scripts + video + speech + music), news illustration (trending events → video + score).
 
-**OAX judging criteria:** Real-world learner impact · Timesaving & learning acceleration · Personalisation · Creative thinking
+### RevisionDojo Future of Learning (HKD 15,000)
+**Focus:** AI-powered learning: feedback, personalisation, assessment, mastery for strong + struggling learners.
+**Our use:** 3–5 step tutorials with completion tracking, progress, and OAX badges.
 
-**Contact:** emile@oax.org
+---
+
+**Our solution — LearnPulse:** AI-powered EdTech platform that uses Exa AI for content discovery, MiniMax for rich tutorial/media generation, and a RevisionDojo-style completion system with badges. "Catch me up" summarises what changed in your tracked domains.
+
+**Key APIs:** Exa AI (semantic search), MiniMax (M2.5 LLM, Hailuo video, Music 2.5, Speech 2.8), Supabase (data).
 
 ---
 
