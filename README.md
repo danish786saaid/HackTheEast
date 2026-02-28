@@ -1,8 +1,15 @@
 # HackTheEast
 
-HackTheEast hackathon project repo. AI-powered solution — details TBD when problem statement is released.
+HackTheEast hackathon project repo. OAX AI EdTech Platform track — AI-powered intelligent curation and adaptive learning.
 
 **Repo:** https://github.com/danish786saaid/HackTheEast
+
+## OAX frontend
+
+Next.js app styled to match [OAX Foundation](https://www.oax.org) branding (no public guidelines; tokens inferred from their site). See `docs/OAX_BRANDING.md` for colors and patterns.
+
+- **Run:** `npm install` then `npm run dev` → http://localhost:3000
+- **Routes:** `/` (home), `/about`, `/resources`, `/grant-program`, `/blog`, `/contact`, `/learn` (EdTech app placeholder)
 
 ---
 
