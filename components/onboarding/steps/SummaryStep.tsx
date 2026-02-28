@@ -4,6 +4,7 @@ import Link from "next/link";
 import { ArrowLeft, ArrowRight, User, Layers, BarChart3 } from "lucide-react";
 import type { ProfileType } from "./ProfileStep";
 import type { ExperienceLevel } from "./ExperienceStep";
+import { useAuth } from "@/lib/auth-context";
 
 type Props = {
   profileType: ProfileType | null;
@@ -32,6 +33,8 @@ export default function SummaryStep({
   onBack,
   onComplete,
 }: Props) {
+  const { isAuthenticated } = useAuth();
+
   return (
     <div className="flex flex-col">
       <h2 className="text-3xl font-semibold tracking-tight text-white">
@@ -86,26 +89,28 @@ export default function SummaryStep({
         <ArrowRight className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-1" />
       </button>
 
-      {/* Auth section — placeholder for Supabase */}
-      <div className="mt-8 border-t border-white/[0.06] pt-8">
-        <p className="text-center text-xs uppercase tracking-widest text-white/20 mb-4">
-          Or sign in to save your progress
-        </p>
-        <div className="flex gap-3">
-          <Link
-            href="/onboarding/register"
-            className="flex-1 border border-white/[0.08] bg-white/[0.02] py-3 text-center text-sm font-medium text-white/60 transition-all hover:border-white/[0.16] hover:text-white"
-          >
-            Create account
-          </Link>
-          <Link
-            href="/onboarding/login"
-            className="flex-1 border border-white/[0.08] bg-white/[0.02] py-3 text-center text-sm font-medium text-white/60 transition-all hover:border-white/[0.16] hover:text-white"
-          >
-            Login
-          </Link>
+      {/* Auth section — only show when not signed in */}
+      {!isAuthenticated && (
+        <div className="mt-8 border-t border-white/[0.06] pt-8">
+          <p className="text-center text-xs uppercase tracking-widest text-white/20 mb-4">
+            Or sign in to save your progress
+          </p>
+          <div className="flex gap-3">
+            <Link
+              href="/onboarding/register"
+              className="flex-1 border border-white/[0.08] bg-white/[0.02] py-3 text-center text-sm font-medium text-white/60 transition-all hover:border-white/[0.16] hover:text-white"
+            >
+              Create account
+            </Link>
+            <Link
+              href="/onboarding/login"
+              className="flex-1 border border-white/[0.08] bg-white/[0.02] py-3 text-center text-sm font-medium text-white/60 transition-all hover:border-white/[0.16] hover:text-white"
+            >
+              Login
+            </Link>
+          </div>
         </div>
-      </div>
+      )}
 
       <div className="mt-8 flex items-center">
         <button

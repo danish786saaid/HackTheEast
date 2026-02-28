@@ -133,6 +133,19 @@ async function upsertOnboardingToSupabase(
 }
 
 /**
+ * Check if the user has a user_onboarding record in Supabase (onboarding complete).
+ */
+async function hasOnboardingRecord(userId: string): Promise<boolean> {
+  if (!supabase) return false;
+  const { data, error } = await supabase
+    .from("user_onboarding")
+    .select("user_id")
+    .eq("user_id", userId)
+    .maybeSingle();
+  return !error && !!data;
+}
+
+/**
  * After OAuth redirect, if guest had cached onboarding prefs,
  * persist them to Supabase and clear the cache.
  */
@@ -165,8 +178,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         } = await supabase.auth.getSession();
         if (session?.user) {
           const mapped = mapSupabaseUser(session.user);
-          persist(mapped, true);
           await migrateGuestPrefsIfNeeded(mapped.id);
+          const complete = await hasOnboardingRecord(mapped.id);
+          persist(mapped, complete);
           setHydrated(true);
           return;
         }
@@ -184,11 +198,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (supabase) {
       const {
         data: { subscription },
-      } = supabase.auth.onAuthStateChange(async (_event, session) => {
+      } =       supabase.auth.onAuthStateChange(async (_event, session) => {
         if (session?.user) {
           const mapped = mapSupabaseUser(session.user);
-          persist(mapped, true);
           await migrateGuestPrefsIfNeeded(mapped.id);
+          const complete = await hasOnboardingRecord(mapped.id);
+          persist(mapped, complete);
         } else {
           persist(null, false);
         }

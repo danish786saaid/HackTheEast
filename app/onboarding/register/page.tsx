@@ -27,8 +27,8 @@ export default function RegisterPage() {
   // Redirect if already authenticated
   useEffect(() => {
     if (!user) return;
-    if (onboardingComplete) router.replace("/");
-    else router.replace("/onboarding");
+    if (onboardingComplete) router.replace("/dashboard");
+    else router.replace("/");
   }, [user, onboardingComplete, router]);
 
   const handleSubmit = useCallback(
@@ -43,15 +43,14 @@ export default function RegisterPage() {
       try {
         const name = [firstName.trim(), lastName.trim()].filter(Boolean).join(" ") || "User";
         await doRegister(name, email.trim(), password);
-        if (onboardingComplete) router.replace("/");
-        else router.replace("/onboarding");
+        router.replace("/");
       } catch (err) {
         setError((err as Error).message);
       } finally {
         setLoading(false);
       }
     },
-    [firstName, lastName, email, password, doRegister, onboardingComplete, router]
+    [firstName, lastName, email, password, doRegister, router]
   );
 
   const handleGoogle = useCallback(async () => {
