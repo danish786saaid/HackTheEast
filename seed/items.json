@@ -2,57 +2,401 @@
   {
     "id": "1",
     "title": "LLM Safety Primer",
-    "url": "https://example.com/llm-safety-primer",
+    "url": "https://arxiv.org/abs/2306.12001",
     "type": "article",
-    "description": "Introduction to LLM safety and alignment"
+    "description": "Introduction to LLM safety and alignment techniques",
+    "date": "2026-02-20"
   },
   {
     "id": "2",
-    "title": "RLHF Explained",
-    "url": "https://example.com/rlhf",
+    "title": "RLHF Explained — Berkeley AI Lecture",
+    "url": "https://youtube.com/watch?v=rlhf-berkeley",
     "type": "video",
-    "description": "Reinforcement learning from human feedback"
+    "description": "Reinforcement learning from human feedback walkthrough",
+    "date": "2026-02-18"
   },
   {
     "id": "3",
-    "title": "Alignment Hands-On Exercise",
-    "url": "https://example.com/alignment-exercise",
+    "title": "Red-Teaming LLMs: Hands-On Exercise",
+    "url": "https://learn.deeplearning.ai/red-teaming-llms",
     "type": "practice",
-    "description": "Practice red-teaming an LLM"
+    "description": "Practice red-teaming an LLM to find safety vulnerabilities",
+    "date": "2026-02-15"
   },
   {
     "id": "4",
-    "title": "GMAsia AI Ethics Panel",
-    "url": "https://example.com/gmasia-panel",
+    "title": "GMAsia AI Ethics Panel 2026",
+    "url": "https://gmasia.org/events/ai-ethics-panel-2026",
     "type": "video",
-    "description": "Panel on AI ethics in Asia"
+    "description": "Panel on AI ethics and governance in Asia-Pacific",
+    "date": "2026-02-10"
   },
   {
     "id": "5",
-    "title": "Constitutional AI Overview",
-    "url": "https://example.com/constitutional-ai",
+    "title": "Constitutional AI: Principles and Practice",
+    "url": "https://arxiv.org/abs/2212.08073",
     "type": "article",
-    "description": "Constitutional AI principles"
+    "description": "Anthropic's Constitutional AI approach to harmless assistants",
+    "date": "2026-02-05"
   },
   {
     "id": "6",
-    "title": "Crypto Regulation in Hong Kong",
-    "url": "https://example.com/hk-crypto",
+    "title": "Crypto Regulation in Hong Kong — 2026 Update",
+    "url": "https://sfc.hk/en/crypto-regulation-2026",
     "type": "article",
-    "description": "Overview of HK crypto policy"
+    "description": "Overview of Hong Kong SFC crypto licensing and policy updates",
+    "date": "2026-02-22"
   },
   {
     "id": "7",
-    "title": "Zero-Knowledge Proofs Tutorial",
-    "url": "https://example.com/zkp",
+    "title": "Zero-Knowledge Proofs for Developers",
+    "url": "https://youtube.com/watch?v=zkp-dev-tutorial",
     "type": "video",
-    "description": "ZK proofs for developers"
+    "description": "Practical ZK proof implementation walkthrough for engineers",
+    "date": "2026-02-12"
   },
   {
     "id": "8",
-    "title": "Smart Contract Security Lab",
-    "url": "https://example.com/sc-security",
+    "title": "Smart Contract Security Audit Lab",
+    "url": "https://ethernaut.openzeppelin.com",
     "type": "practice",
-    "description": "Audit a sample smart contract"
+    "description": "Hands-on exercises auditing Solidity smart contracts for vulnerabilities",
+    "date": "2026-01-28"
+  },
+  {
+    "id": "9",
+    "title": "Transformer Architecture Deep Dive",
+    "url": "https://jalammar.github.io/illustrated-transformer",
+    "type": "article",
+    "description": "Visual guide to the transformer architecture behind modern LLMs",
+    "date": "2026-01-15"
+  },
+  {
+    "id": "10",
+    "title": "GMAsia Keynote: AI in Southeast Asian Finance",
+    "url": "https://gmasia.org/events/ai-sea-finance-keynote",
+    "type": "video",
+    "description": "Keynote on how AI is transforming financial services across ASEAN",
+    "date": "2026-02-25"
+  },
+  {
+    "id": "11",
+    "title": "Prompt Engineering Masterclass",
+    "url": "https://learn.deeplearning.ai/prompt-engineering",
+    "type": "practice",
+    "description": "Hands-on exercises for effective prompt design and chain-of-thought reasoning",
+    "date": "2026-02-14"
+  },
+  {
+    "id": "12",
+    "title": "China's AI Governance Framework — Analysis",
+    "url": "https://carnegieendowment.org/china-ai-governance-2026",
+    "type": "article",
+    "description": "Analysis of China's evolving AI regulations and their global impact",
+    "date": "2026-02-08"
+  },
+  {
+    "id": "13",
+    "title": "DeFi Yield Strategies in Asia-Pacific",
+    "url": "https://defipulse.com/asia-yield-strategies",
+    "type": "article",
+    "description": "Overview of DeFi yield farming strategies popular in Asian markets",
+    "date": "2026-01-30"
+  },
+  {
+    "id": "14",
+    "title": "Building RAG Pipelines — Workshop Recording",
+    "url": "https://youtube.com/watch?v=rag-workshop-2026",
+    "type": "video",
+    "description": "Workshop on building retrieval-augmented generation systems from scratch",
+    "date": "2026-02-19"
+  },
+  {
+    "id": "15",
+    "title": "Tokenomics Design Exercise",
+    "url": "https://tokenengineering.net/exercises/tokenomics",
+    "type": "practice",
+    "description": "Design and simulate a token economy using interactive tools",
+    "date": "2026-02-01"
+  },
+  {
+    "id": "16",
+    "title": "Japan's Digital Yen Pilot — Progress Report",
+    "url": "https://boj.or.jp/en/digital-yen-pilot-2026",
+    "type": "article",
+    "description": "Bank of Japan's CBDC pilot results and next steps for digital yen",
+    "date": "2026-02-24"
+  },
+  {
+    "id": "17",
+    "title": "Attention Mechanisms Visualized",
+    "url": "https://youtube.com/watch?v=attention-viz-2026",
+    "type": "video",
+    "description": "Visual explanation of self-attention, multi-head attention, and cross-attention",
+    "date": "2026-01-20"
+  },
+  {
+    "id": "18",
+    "title": "Fine-Tuning LLMs with LoRA — Lab",
+    "url": "https://huggingface.co/learn/lora-finetuning-lab",
+    "type": "practice",
+    "description": "Hands-on lab for parameter-efficient fine-tuning using LoRA adapters",
+    "date": "2026-02-16"
+  },
+  {
+    "id": "19",
+    "title": "Singapore's AI Verify Framework",
+    "url": "https://imda.gov.sg/ai-verify-2026",
+    "type": "article",
+    "description": "Singapore's AI governance testing framework for responsible deployment",
+    "date": "2026-02-11"
+  },
+  {
+    "id": "20",
+    "title": "Ethereum Layer 2 Scaling Explained",
+    "url": "https://youtube.com/watch?v=l2-scaling-2026",
+    "type": "video",
+    "description": "How rollups, validiums, and L2s scale Ethereum for real-world throughput",
+    "date": "2026-01-25"
+  },
+  {
+    "id": "21",
+    "title": "GMAsia Report: AI Talent Migration in Asia",
+    "url": "https://gmasia.org/reports/ai-talent-migration",
+    "type": "article",
+    "description": "Data-driven report on AI talent flows between US, China, India, and SE Asia",
+    "date": "2026-02-21"
+  },
+  {
+    "id": "22",
+    "title": "Build a Vector Database from Scratch",
+    "url": "https://github.com/vector-db-from-scratch/workshop",
+    "type": "practice",
+    "description": "Step-by-step exercise building a simple vector store with HNSW indexing",
+    "date": "2026-02-06"
+  },
+  {
+    "id": "23",
+    "title": "OAX Foundation: Decentralized Trust in AI",
+    "url": "https://oax.org/research/decentralized-trust-ai",
+    "type": "article",
+    "description": "OAX research paper on combining blockchain verification with AI model outputs",
+    "date": "2026-02-17"
+  },
+  {
+    "id": "24",
+    "title": "Multimodal AI: Text, Image, Audio Fusion",
+    "url": "https://youtube.com/watch?v=multimodal-ai-tutorial",
+    "type": "video",
+    "description": "Tutorial on building multimodal AI systems combining text, vision, and audio",
+    "date": "2026-02-13"
+  },
+  {
+    "id": "25",
+    "title": "Web3 Wallet Integration Lab",
+    "url": "https://docs.metamask.io/wallet/tutorials/integration-lab",
+    "type": "practice",
+    "description": "Connect a dApp to MetaMask, sign transactions, and verify on-chain",
+    "date": "2026-01-18"
+  },
+  {
+    "id": "26",
+    "title": "South Korea's Virtual Asset User Protection Act",
+    "url": "https://fsc.go.kr/eng/virtual-asset-protection-2026",
+    "type": "article",
+    "description": "Analysis of Korea's landmark crypto investor protection legislation",
+    "date": "2026-02-09"
+  },
+  {
+    "id": "27",
+    "title": "Diffusion Models Explained — From Noise to Images",
+    "url": "https://youtube.com/watch?v=diffusion-explained-2026",
+    "type": "video",
+    "description": "Intuitive walkthrough of diffusion model theory and image generation",
+    "date": "2026-01-22"
+  },
+  {
+    "id": "28",
+    "title": "Evaluate LLM Outputs — Benchmarking Lab",
+    "url": "https://learn.deeplearning.ai/llm-evaluation-lab",
+    "type": "practice",
+    "description": "Hands-on lab for evaluating LLM quality using automated metrics and human review",
+    "date": "2026-02-23"
+  },
+  {
+    "id": "29",
+    "title": "India's Digital Personal Data Protection Act and AI",
+    "url": "https://meity.gov.in/dpdp-ai-implications",
+    "type": "article",
+    "description": "How India's data protection law affects AI training data and model deployment",
+    "date": "2026-02-04"
+  },
+  {
+    "id": "30",
+    "title": "GMAsia Panel: Stablecoins in Cross-Border Payments",
+    "url": "https://gmasia.org/events/stablecoins-cross-border",
+    "type": "video",
+    "description": "Industry panel on using stablecoins for Asia-Pacific cross-border settlements",
+    "date": "2026-02-26"
+  },
+  {
+    "id": "31",
+    "title": "Agentic AI Systems — Architecture Patterns",
+    "url": "https://arxiv.org/abs/2401.agentic-patterns",
+    "type": "article",
+    "description": "Survey of agentic AI architectures including tool use, planning, and memory",
+    "date": "2026-02-27"
+  },
+  {
+    "id": "32",
+    "title": "Build an AI Agent with Tool Calling",
+    "url": "https://learn.deeplearning.ai/ai-agents-tool-calling",
+    "type": "practice",
+    "description": "Build a function-calling AI agent that uses external APIs and databases",
+    "date": "2026-02-20"
+  },
+  {
+    "id": "33",
+    "title": "Hong Kong Web3 Hub Strategy — Government Report",
+    "url": "https://hkma.gov.hk/web3-hub-strategy-2026",
+    "type": "article",
+    "description": "HKMA report on positioning Hong Kong as a global Web3 and virtual asset hub",
+    "date": "2026-02-15"
+  },
+  {
+    "id": "34",
+    "title": "Mixture of Experts — How MoE Models Work",
+    "url": "https://youtube.com/watch?v=moe-models-explained",
+    "type": "video",
+    "description": "Technical explainer on sparse MoE architectures used in GPT-4 and Mixtral",
+    "date": "2026-02-03"
+  },
+  {
+    "id": "35",
+    "title": "Solana Program Development Workshop",
+    "url": "https://solana.com/developers/workshops/program-dev",
+    "type": "practice",
+    "description": "Write, test, and deploy a Solana program using Anchor framework",
+    "date": "2026-01-10"
+  },
+  {
+    "id": "36",
+    "title": "ASEAN AI Ethics Guidelines Comparison",
+    "url": "https://asean.org/ai-ethics-guidelines-comparison",
+    "type": "article",
+    "description": "Side-by-side comparison of AI ethics frameworks across ASEAN member states",
+    "date": "2026-02-07"
+  },
+  {
+    "id": "37",
+    "title": "Speech Synthesis with MiniMax — Demo",
+    "url": "https://youtube.com/watch?v=minimax-speech-demo",
+    "type": "video",
+    "description": "Demo of MiniMax Speech-02 API for high-quality text-to-speech generation",
+    "date": "2026-02-19"
+  },
+  {
+    "id": "38",
+    "title": "Deploy ML Models with FastAPI — Lab",
+    "url": "https://github.com/ml-deploy-fastapi/workshop",
+    "type": "practice",
+    "description": "Package and deploy a machine learning model as a REST API using FastAPI",
+    "date": "2026-01-28"
+  },
+  {
+    "id": "39",
+    "title": "Taiwan Semiconductor Export Controls Impact on AI",
+    "url": "https://brookings.edu/taiwan-chips-ai-2026",
+    "type": "article",
+    "description": "How Taiwan's chip export policies shape global AI hardware availability",
+    "date": "2026-02-12"
+  },
+  {
+    "id": "40",
+    "title": "GMAsia Fireside: Founders Building AI in Hong Kong",
+    "url": "https://gmasia.org/events/hk-ai-founders-fireside",
+    "type": "video",
+    "description": "Fireside chat with HK-based AI startup founders on local ecosystem challenges",
+    "date": "2026-02-28"
+  },
+  {
+    "id": "41",
+    "title": "Embedding Models Compared: OpenAI vs Cohere vs Local",
+    "url": "https://huggingface.co/blog/embedding-models-comparison-2026",
+    "type": "article",
+    "description": "Benchmark comparison of commercial and open-source text embedding models",
+    "date": "2026-02-18"
+  },
+  {
+    "id": "42",
+    "title": "Semantic Search Implementation Lab",
+    "url": "https://learn.deeplearning.ai/semantic-search-lab",
+    "type": "practice",
+    "description": "Build a semantic search engine using embeddings, vector stores, and reranking",
+    "date": "2026-02-10"
+  },
+  {
+    "id": "43",
+    "title": "Philippines Central Bank Digital Currency Roadmap",
+    "url": "https://bsp.gov.ph/cbdc-roadmap-2026",
+    "type": "article",
+    "description": "BSP roadmap for a Philippine CBDC and impact on remittance corridors",
+    "date": "2026-01-31"
+  },
+  {
+    "id": "44",
+    "title": "Reinforcement Learning for Game AI — Lecture",
+    "url": "https://youtube.com/watch?v=rl-game-ai-2026",
+    "type": "video",
+    "description": "University lecture on applying RL to game environments and sim-to-real transfer",
+    "date": "2026-01-16"
+  },
+  {
+    "id": "45",
+    "title": "Blockchain Badge Verification — Coding Exercise",
+    "url": "https://github.com/badge-verification-exercise",
+    "type": "practice",
+    "description": "Implement HMAC-signed digital badges and verify them on-chain",
+    "date": "2026-02-22"
+  },
+  {
+    "id": "46",
+    "title": "EU AI Act Implications for Asian Tech Companies",
+    "url": "https://reuters.com/technology/eu-ai-act-asia-impact-2026",
+    "type": "article",
+    "description": "How EU AI regulation affects Asian companies exporting AI services to Europe",
+    "date": "2026-02-24"
+  },
+  {
+    "id": "47",
+    "title": "Knowledge Graphs Meet LLMs — Research Talk",
+    "url": "https://youtube.com/watch?v=kg-llm-research-talk",
+    "type": "video",
+    "description": "Research talk on combining knowledge graphs with LLMs for better reasoning",
+    "date": "2026-02-08"
+  },
+  {
+    "id": "48",
+    "title": "Federated Learning Privacy Lab",
+    "url": "https://flower.ai/tutorials/federated-learning-lab",
+    "type": "practice",
+    "description": "Train a model across distributed nodes without sharing raw data",
+    "date": "2026-02-02"
+  },
+  {
+    "id": "49",
+    "title": "MiniMax M2.5 Model Capabilities Overview",
+    "url": "https://minimaxi.com/platform/models/m2-5",
+    "type": "article",
+    "description": "Technical overview of MiniMax M2.5 LLM capabilities, benchmarks, and API usage",
+    "date": "2026-02-26"
+  },
+  {
+    "id": "50",
+    "title": "GMAsia Workshop: Responsible AI Deployment Checklist",
+    "url": "https://gmasia.org/workshops/responsible-ai-checklist",
+    "type": "practice",
+    "description": "Interactive workshop to build a responsible AI deployment checklist for production",
+    "date": "2026-02-14"
   }
 ]

@@ -1,4 +1,4 @@
-# Integration: FrontBackEndV1
+# Integration: FrontBackMLV1
 
 **Parent:** integration | **Merge into:** main
 
@@ -10,3 +10,4 @@
 - Settings page with bento grid layout.
 - Tutorials: 3-step viewer (Read/Watch/Practice), TLDRs, time estimates, Start/Complete/Claim Badge buttons.
 - News illustrator: trending news with MiniMax video/music generation.
+- AI/ML: 50 curated seed items, 128-dim embeddings, cosine similarity + recency retriever, MiniMax LLM path generator, 3 canned outputs, audio script and fallback.
