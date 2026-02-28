@@ -19,23 +19,12 @@ export default function OnboardingPage() {
     isAuthenticated,
     completeOnboarding,
     saveOnboardingPrefs,
-    getGuestOnboardingPrefs,
   } = useAuth();
 
   const [step, setStep] = useState(0);
   const [profileType, setProfileType] = useState<ProfileType | null>(null);
   const [interests, setInterests] = useState<string[]>([]);
   const [experienceLevel, setExperienceLevel] = useState<ExperienceLevel | null>(null);
-
-  // Restore guest onboarding state after OAuth redirect
-  useEffect(() => {
-    const cached = getGuestOnboardingPrefs();
-    if (cached) {
-      if (cached.profileType) setProfileType(cached.profileType as ProfileType);
-      if (cached.interests?.length) setInterests(cached.interests);
-      if (cached.experienceLevel) setExperienceLevel(cached.experienceLevel as ExperienceLevel);
-    }
-  }, [getGuestOnboardingPrefs]);
 
   const next = useCallback(() => setStep((s) => Math.min(s + 1, TOTAL_STEPS - 1)), []);
   const back = useCallback(() => setStep((s) => Math.max(s - 1, 0)), []);

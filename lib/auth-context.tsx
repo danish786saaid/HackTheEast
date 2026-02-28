@@ -8,11 +8,10 @@ import {
   useState,
   type ReactNode,
 } from "react";
-import { supabase } from "./supabaseClient";
+import { createClient } from "@/lib/supabase/client";
 
 // ── Storage keys ─────────────────────────────────────────
 const AUTH_STORAGE_KEY = "edtech-auth";
-const GUEST_ONBOARDING_KEY = "edtech-guest-onboarding";
 
 // ── Types ────────────────────────────────────────────────
 export type User = {
@@ -39,13 +38,17 @@ type AuthContextValue = {
   isAuthenticated: boolean;
   onboardingComplete: boolean;
   login: (email: string, password: string) => Promise<void>;
-  register: (name: string, email: string, password: string) => Promise<void>;
+  register: (
+    name: string,
+    email: string,
+    password: string,
+    metadata?: { first_name?: string; last_name?: string }
+  ) => Promise<void>;
   logout: () => void;
   completeOnboarding: () => void;
-  signInWithOAuth: (provider: "google" | "apple") => Promise<void>;
+  signInWithOAuth: (provider: "google") => Promise<void>;
   signInWithEmail: (email: string) => Promise<void>;
   saveOnboardingPrefs: (prefs: OnboardingPrefs) => Promise<void>;
-  getGuestOnboardingPrefs: () => OnboardingPrefs | null;
   updateProfile: (updates: Partial<Pick<User, "name" | "email" | "handle" | "avatarUrl">>) => void;
 };
 
@@ -67,27 +70,6 @@ function saveStored(data: StoredAuth | null) {
   if (typeof window === "undefined") return;
   if (data) localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(data));
   else localStorage.removeItem(AUTH_STORAGE_KEY);
-}
-
-// ── Guest onboarding cache ───────────────────────────────
-
-function cacheGuestOnboarding(prefs: OnboardingPrefs) {
-  if (typeof window === "undefined") return;
-  localStorage.setItem(GUEST_ONBOARDING_KEY, JSON.stringify(prefs));
-}
-
-function loadGuestOnboarding(): OnboardingPrefs | null {
-  if (typeof window === "undefined") return null;
-  try {
-    const raw = localStorage.getItem(GUEST_ONBOARDING_KEY);
-    return raw ? (JSON.parse(raw) as OnboardingPrefs) : null;
-  } catch {
-    return null;
-  }
-}
-
-function clearGuestOnboarding() {
-  if (typeof window !== "undefined") localStorage.removeItem(GUEST_ONBOARDING_KEY);
 }
 
 // ── Utilities ────────────────────────────────────────────
@@ -121,6 +103,7 @@ async function upsertOnboardingToSupabase(
   userId: string,
   prefs: OnboardingPrefs
 ) {
+  const supabase = createClient();
   if (!supabase) return;
   const { error } = await supabase.from("user_onboarding").upsert(
     {
@@ -132,17 +115,6 @@ async function upsertOnboardingToSupabase(
     { onConflict: "user_id" }
   );
   if (error) console.error("[auth] Failed to persist onboarding:", error.message);
-}
-
-/**
- * After OAuth redirect, if guest had cached onboarding prefs,
- * persist them to Supabase and clear the cache.
- */
-async function migrateGuestPrefsIfNeeded(userId: string) {
-  const cached = loadGuestOnboarding();
-  if (!cached) return;
-  await upsertOnboardingToSupabase(userId, cached);
-  clearGuestOnboarding();
 }
 
 // ── Provider ─────────────────────────────────────────────
@@ -160,6 +132,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   // Hydrate: check Supabase session first, then localStorage fallback
   useEffect(() => {
+    const supabase = createClient();
     async function init() {
       if (supabase) {
         const {
@@ -168,7 +141,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         if (session?.user) {
           const mapped = mapSupabaseUser(session.user);
           persist(mapped, true);
-          await migrateGuestPrefsIfNeeded(mapped.id);
           setHydrated(true);
           return;
         }
@@ -186,11 +158,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (supabase) {
       const {
         data: { subscription },
-      } = supabase.auth.onAuthStateChange(async (_event, session) => {
+      } = supabase.auth.onAuthStateChange(async (_event: string, session: { user?: { id: string; email?: string | null; user_metadata?: Record<string, unknown> } } | null) => {
         if (session?.user) {
           const mapped = mapSupabaseUser(session.user);
           persist(mapped, true);
-          await migrateGuestPrefsIfNeeded(mapped.id);
         } else {
           persist(null, false);
         }
@@ -202,7 +173,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   // ── OAuth (Google / Apple) ─────────────────────────────
   const signInWithOAuth = useCallback(
-    async (provider: "google" | "apple") => {
+    async (provider: "google") => {
+      const supabase = createClient();
       if (!supabase) {
         console.warn("[auth] Supabase not configured — OAuth unavailable");
         return;
@@ -210,7 +182,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const { error } = await supabase.auth.signInWithOAuth({
         provider,
         options: {
-          redirectTo: `${window.location.origin}/onboarding`,
+          redirectTo: `${window.location.origin}/auth/callback?next=/`,
         },
       });
       if (error) throw new Error(error.message);
@@ -220,6 +192,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   // ── Magic link email auth ──────────────────────────────
   const signInWithEmail = useCallback(async (email: string) => {
+    const supabase = createClient();
     if (!supabase) {
       console.warn("[auth] Supabase not configured — email auth unavailable");
       return;
@@ -234,28 +207,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   // ── Save onboarding preferences ────────────────────────
-  // Authenticated: persists to user_onboarding table
-  // Guest: caches in localStorage
   const saveOnboardingPrefs = useCallback(
     async (prefs: OnboardingPrefs) => {
+      const supabase = createClient();
       if (user && supabase) {
         await upsertOnboardingToSupabase(user.id, prefs);
-        clearGuestOnboarding();
-      } else {
-        cacheGuestOnboarding(prefs);
       }
     },
     [user]
   );
 
-  // ── Read guest onboarding cache ────────────────────────
-  const getGuestOnboardingPrefs = useCallback(() => {
-    return loadGuestOnboarding();
-  }, []);
-
   // ── Password-based login ───────────────────────────────
   const login = useCallback(
     async (email: string, password: string) => {
+      const supabase = createClient();
       if (supabase) {
         const { error } = await supabase.auth.signInWithPassword({
           email,
@@ -282,12 +247,26 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   // ── Password-based register ────────────────────────────
   const register = useCallback(
-    async (name: string, email: string, password: string) => {
+    async (
+      name: string,
+      email: string,
+      password: string,
+      metadata?: { first_name?: string; last_name?: string }
+    ) => {
+      const supabase = createClient();
       if (supabase) {
         const { error } = await supabase.auth.signUp({
           email,
           password,
-          options: { data: { username: name, full_name: name } },
+          options: {
+            data: {
+              name,
+              username: name,
+              full_name: name,
+              first_name: metadata?.first_name ?? "",
+              last_name: metadata?.last_name ?? "",
+            },
+          },
         });
         if (error) throw new Error(error.message);
         return;
@@ -307,6 +286,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   );
 
   const logout = useCallback(async () => {
+    const supabase = createClient();
     if (supabase) await supabase.auth.signOut();
     persist(null, false);
   }, [persist]);
@@ -338,7 +318,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     signInWithOAuth,
     signInWithEmail,
     saveOnboardingPrefs,
-    getGuestOnboardingPrefs,
     updateProfile,
   };
 
