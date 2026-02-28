@@ -1,11 +1,11 @@
 import TopBar from "@/components/layout/TopBar";
-import BentoMain from "@/components/dashboard/BentoMain";
+import Dashboard from "@/components/dashboard/Dashboard";
 
 export default function Home() {
   return (
     <>
       <TopBar />
-      <BentoMain />
+      <Dashboard />
     </>
   );
 }

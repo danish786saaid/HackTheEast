@@ -1,0 +1,9 @@
+---
+description: Always confirm with the user before making any changes
+alwaysApply: true
+---
+
+# Confirm Before Changes
+
+- Before editing, creating, or deleting any file, describe the planned change in **one sentence** and wait for approval.
+- Do not proceed until the user confirms.

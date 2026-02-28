@@ -22,6 +22,9 @@ const config: Config = {
           text: "#fafaf9",
           muted: "#a8a29e",
           dim: "#78716c",
+          blue: "#3b82f6",
+          blueDark: "#2563eb",
+          blueLight: "#60a5fa",
         },
       },
       backgroundImage: {
