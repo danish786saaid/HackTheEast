@@ -1,0 +1,41 @@
+Badge Forge — Demo Narration Script (for MiniMax Speech-02 or manual recording)
+
+---
+
+[INTRO — 10 seconds]
+
+"We solve content overload for fast-moving fields by generating a 3-step adaptive
+learning path from curated GMAsia content and issuing a verifiable OAX-style badge
+on completion — all demoed in 90 seconds."
+
+[DEMO WALKTHROUGH — 50 seconds]
+
+"Here's our GMAsia content feed — dozens of articles, videos, and exercises across
+AI, crypto, and policy. A learner types their goal: 'Understand LLM safety basics.'
+
+Badge Forge uses embedding similarity and recency ranking to surface the most
+relevant items. Then MiniMax generates a personalized 3-step path: Read a safety
+primer, Watch an RLHF lecture, and Practice red-teaming an LLM — all in under
+90 minutes.
+
+Each step shows a one-sentence summary and time estimate. The explainability panel
+reveals similarity and recency scores so learners see why each item was chosen.
+
+When the learner completes the path, they click Claim Badge. Badge Forge issues a
+signed JSON credential using HMAC-SHA256 — verifiable, portable, and tamper-proof."
+
+[CLOSING — 20 seconds]
+
+"Badge Forge saves hours of content discovery, delivers personalized micro-learning,
+and produces verifiable outcomes. With MiniMax for intelligent generation and OAX-style
+badges for trust, we turn information overload into focused, credentialed learning."
+
+---
+
+Total narration time: approximately 80 seconds.
+
+For MiniMax Speech-02 generation:
+  - Voice: default English male or female
+  - Speed: 1.0x
+  - API endpoint: POST https://api.minimax.chat/v1/t2a_v2
+  - Model: speech-02-hd

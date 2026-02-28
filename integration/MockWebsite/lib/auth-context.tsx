@@ -1,0 +1,352 @@
+"use client";
+
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useState,
+  type ReactNode,
+} from "react";
+import { createClient } from "@/lib/supabase/client";
+
+// ── Storage keys ─────────────────────────────────────────
+const AUTH_STORAGE_KEY = "edtech-auth";
+
+// ── Types ────────────────────────────────────────────────
+export type User = {
+  id: string;
+  name: string;
+  email: string;
+  handle: string;
+  avatarUrl?: string;
+};
+
+export type OnboardingPrefs = {
+  profileType: string | null;
+  interests: string[];
+  experienceLevel: string | null;
+};
+
+type StoredAuth = {
+  user: User;
+  onboardingComplete: boolean;
+};
+
+type AuthContextValue = {
+  user: User | null;
+  isAuthenticated: boolean;
+  onboardingComplete: boolean;
+  login: (email: string, password: string) => Promise<void>;
+  register: (
+    name: string,
+    email: string,
+    password: string,
+    metadata?: { first_name?: string; last_name?: string }
+  ) => Promise<void>;
+  logout: () => void;
+  completeOnboarding: () => void;
+  signInWithOAuth: (provider: "google") => Promise<void>;
+  signInWithEmail: (email: string) => Promise<void>;
+  saveOnboardingPrefs: (prefs: OnboardingPrefs) => Promise<void>;
+  updateProfile: (updates: Partial<Pick<User, "name" | "email" | "handle" | "avatarUrl">>) => void;
+};
+
+const AuthContext = createContext<AuthContextValue | null>(null);
+
+// ── Local storage helpers ────────────────────────────────
+
+function loadStored(): StoredAuth | null {
+  if (typeof window === "undefined") return null;
+  try {
+    const raw = localStorage.getItem(AUTH_STORAGE_KEY);
+    return raw ? (JSON.parse(raw) as StoredAuth) : null;
+  } catch {
+    return null;
+  }
+}
+
+function saveStored(data: StoredAuth | null) {
+  if (typeof window === "undefined") return;
+  if (data) localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(data));
+  else localStorage.removeItem(AUTH_STORAGE_KEY);
+}
+
+// ── Utilities ────────────────────────────────────────────
+
+function slugFromName(name: string): string {
+  return name.toLowerCase().replace(/\s+/g, "_").replace(/[^a-z0-9_]/g, "");
+}
+
+function mapSupabaseUser(su: {
+  id: string;
+  email?: string | null;
+  user_metadata?: Record<string, unknown>;
+}): User {
+  const name =
+    (su.user_metadata?.full_name as string) ??
+    (su.user_metadata?.username as string) ??
+    (su.user_metadata?.name as string) ??
+    su.email?.split("@")[0] ??
+    "User";
+  return {
+    id: su.id,
+    name,
+    email: su.email ?? "",
+    handle: `@${slugFromName(name)}`,
+  };
+}
+
+// ── Supabase persistence for onboarding prefs ────────────
+
+async function upsertOnboardingToSupabase(
+  userId: string,
+  prefs: OnboardingPrefs
+) {
+  const supabase = createClient();
+  if (!supabase) return;
+  const { error } = await supabase.from("user_onboarding").upsert(
+    {
+      user_id: userId,
+      profile_type: prefs.profileType,
+      interests: prefs.interests,
+      experience_level: prefs.experienceLevel,
+    },
+    { onConflict: "user_id" }
+  );
+  if (error) console.error("[auth] Failed to persist onboarding:", error.message);
+}
+
+// ── Provider ─────────────────────────────────────────────
+
+export function AuthProvider({ children }: { children: ReactNode }) {
+  const [user, setUser] = useState<User | null>(null);
+  const [onboardingComplete, setOnboardingComplete] = useState(false);
+  const [hydrated, setHydrated] = useState(false);
+
+  const persist = useCallback((u: User | null, complete: boolean) => {
+    setUser(u);
+    setOnboardingComplete(complete);
+    saveStored(u ? { user: u, onboardingComplete: complete } : null);
+  }, []);
+
+  // Hydrate: check Supabase session first, then localStorage fallback
+  useEffect(() => {
+    const supabase = createClient();
+    async function init() {
+      if (supabase) {
+        const {
+          data: { session },
+        } = await supabase.auth.getSession();
+        if (session?.user) {
+          const mapped = mapSupabaseUser(session.user);
+          persist(mapped, true);
+          setHydrated(true);
+          return;
+        }
+      }
+      const stored = loadStored();
+      if (stored?.user) {
+        setUser(stored.user);
+        setOnboardingComplete(stored.onboardingComplete ?? false);
+      }
+      setHydrated(true);
+    }
+
+    init();
+
+    if (supabase) {
+      const {
+        data: { subscription },
+      } = supabase.auth.onAuthStateChange(async (_event: string, session: { user?: { id: string; email?: string | null; user_metadata?: Record<string, unknown> } } | null) => {
+        if (session?.user) {
+          const mapped = mapSupabaseUser(session.user);
+          persist(mapped, true);
+        } else {
+          persist(null, false);
+        }
+      });
+      return () => subscription.unsubscribe();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // ── OAuth (Google / Apple) ─────────────────────────────
+  const signInWithOAuth = useCallback(
+    async (provider: "google") => {
+      const supabase = createClient();
+      if (!supabase) {
+        console.warn("[auth] Supabase not configured — OAuth unavailable");
+        return;
+      }
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider,
+        options: {
+          redirectTo: `${window.location.origin}/auth/callback?next=/`,
+        },
+      });
+      if (error) throw new Error(error.message);
+    },
+    []
+  );
+
+  // ── Magic link email auth ──────────────────────────────
+  const signInWithEmail = useCallback(async (email: string) => {
+    const supabase = createClient();
+    if (!supabase) {
+      console.warn("[auth] Supabase not configured — email auth unavailable");
+      return;
+    }
+    const { error } = await supabase.auth.signInWithOtp({
+      email,
+      options: {
+        emailRedirectTo: `${window.location.origin}/onboarding`,
+      },
+    });
+    if (error) throw new Error(error.message);
+  }, []);
+
+  // ── Save onboarding preferences ────────────────────────
+  const saveOnboardingPrefs = useCallback(
+    async (prefs: OnboardingPrefs) => {
+      const supabase = createClient();
+      if (user && supabase) {
+        await upsertOnboardingToSupabase(user.id, prefs);
+      }
+    },
+    [user]
+  );
+
+  // ── Password-based login ───────────────────────────────
+  const login = useCallback(
+    async (email: string, password: string) => {
+      const supabase = createClient();
+      if (supabase) {
+        const { error } = await supabase.auth.signInWithPassword({
+          email,
+          password,
+        });
+        if (error) throw new Error(error.message);
+        return;
+      }
+      await new Promise((r) => setTimeout(r, 400));
+      const name = email.split("@")[0].replace(/[._]/g, " ");
+      const displayName = name.charAt(0).toUpperCase() + name.slice(1);
+      persist(
+        {
+          id: `user-${Date.now()}`,
+          name: displayName,
+          email,
+          handle: `@${slugFromName(displayName) || "user"}`,
+        },
+        true
+      );
+    },
+    [persist]
+  );
+
+  // ── Password-based register ────────────────────────────
+  const register = useCallback(
+    async (
+      name: string,
+      email: string,
+      password: string,
+      metadata?: { first_name?: string; last_name?: string }
+    ) => {
+      const supabase = createClient();
+      if (supabase) {
+        const { error } = await supabase.auth.signUp({
+          email,
+          password,
+          options: {
+            data: {
+              name,
+              username: name,
+              full_name: name,
+              first_name: metadata?.first_name ?? "",
+              last_name: metadata?.last_name ?? "",
+            },
+          },
+        });
+        if (error) throw new Error(error.message);
+        return;
+      }
+      await new Promise((r) => setTimeout(r, 400));
+      persist(
+        {
+          id: `user-${Date.now()}`,
+          name: name.trim(),
+          email,
+          handle: `@${slugFromName(name) || "user"}`,
+        },
+        false
+      );
+    },
+    [persist]
+  );
+
+  const logout = useCallback(async () => {
+    const supabase = createClient();
+    if (supabase) await supabase.auth.signOut();
+    persist(null, false);
+  }, [persist]);
+
+  const completeOnboarding = useCallback(() => {
+    if (!user) return;
+    setOnboardingComplete(true);
+    saveStored({ user, onboardingComplete: true });
+  }, [user]);
+
+  const updateProfile = useCallback(
+    (updates: Partial<Pick<User, "name" | "email" | "handle" | "avatarUrl">>) => {
+      if (!user) return;
+      const next = { ...user, ...updates };
+      setUser(next);
+      saveStored({ user: next, onboardingComplete });
+    },
+    [user, onboardingComplete]
+  );
+
+  const value: AuthContextValue = {
+    user,
+    isAuthenticated: !!user,
+    onboardingComplete,
+    login,
+    register,
+    logout,
+    completeOnboarding,
+    signInWithOAuth,
+    signInWithEmail,
+    saveOnboardingPrefs,
+    updateProfile,
+  };
+
+  if (!hydrated) {
+    return (
+      <AuthContext.Provider value={value}>
+        <div className="min-h-screen flex items-center justify-center bg-[#0c0a09]">
+          <div className="h-8 w-8 animate-pulse rounded-lg bg-white/10" />
+        </div>
+      </AuthContext.Provider>
+    );
+  }
+
+  return (
+    <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
+  );
+}
+
+export function useAuth() {
+  const ctx = useContext(AuthContext);
+  if (!ctx) throw new Error("useAuth must be used within AuthProvider");
+  return ctx;
+}
+
+export function initials(name: string): string {
+  return name
+    .split(/\s+/)
+    .map((s) => s[0])
+    .join("")
+    .toUpperCase()
+    .slice(0, 2);
+}

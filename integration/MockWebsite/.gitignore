@@ -1,0 +1,37 @@
+# Dependencies
+node_modules/
+__pycache__/
+*.pyc
+.venv/
+venv/
+env/
+.pnp
+.pnp.js
+
+# Environment / secrets
+.env
+.env.local
+.env.*.local
+*.pem
+
+# Build / output
+dist/
+build/
+.next/
+out/
+*.egg-info/
+.eggs/
+
+# IDE / OS
+.DS_Store
+.idea/
+*.swp
+*.swo
+.cache/
+
+# Logs
+*.log
+npm-debug.log*
+
+# Optional: uncomment if you use Jupyter
+# .ipynb_checkpoints/
