@@ -1,0 +1,85 @@
+{
+  "goals": {
+    "Understand LLM safety basics": {
+      "goal": "Understand LLM safety basics",
+      "path": [
+        {
+          "step": "Read",
+          "item_title": "LLM Safety Primer",
+          "item_url": "https://arxiv.org/abs/2306.12001",
+          "tldr": "Covers core LLM safety concepts including alignment, jailbreaking, and mitigation strategies.",
+          "minutes": 20
+        },
+        {
+          "step": "Watch",
+          "item_title": "RLHF Explained — Berkeley AI Lecture",
+          "item_url": "https://youtube.com/watch?v=rlhf-berkeley",
+          "tldr": "Walks through how reinforcement learning from human feedback shapes model behavior toward safety.",
+          "minutes": 25
+        },
+        {
+          "step": "Practice",
+          "item_title": "Red-Teaming LLMs: Hands-On Exercise",
+          "item_url": "https://learn.deeplearning.ai/red-teaming-llms",
+          "tldr": "Hands-on exercise finding safety vulnerabilities through adversarial prompting techniques.",
+          "minutes": 30
+        }
+      ],
+      "rationale": "Foundational reading on safety concepts, followed by understanding RLHF as the key training technique, then applying knowledge through practical red-teaming."
+    },
+    "Learn about crypto regulation in Asia": {
+      "goal": "Learn about crypto regulation in Asia",
+      "path": [
+        {
+          "step": "Read",
+          "item_title": "Crypto Regulation in Hong Kong — 2026 Update",
+          "item_url": "https://sfc.hk/en/crypto-regulation-2026",
+          "tldr": "Covers Hong Kong SFC licensing requirements and the latest 2026 policy changes for virtual assets.",
+          "minutes": 20
+        },
+        {
+          "step": "Watch",
+          "item_title": "GMAsia Panel: Stablecoins in Cross-Border Payments",
+          "item_url": "https://gmasia.org/events/stablecoins-cross-border",
+          "tldr": "Industry leaders discuss how stablecoins enable faster cross-border settlements across Asia-Pacific.",
+          "minutes": 25
+        },
+        {
+          "step": "Practice",
+          "item_title": "Tokenomics Design Exercise",
+          "item_url": "https://tokenengineering.net/exercises/tokenomics",
+          "tldr": "Design and simulate a token economy to understand the mechanics regulators are addressing.",
+          "minutes": 30
+        }
+      ],
+      "rationale": "Start with HK's regulatory framework as a regional reference, broaden perspective with cross-border stablecoin use cases, then build intuition through hands-on tokenomics design."
+    },
+    "Get started with zero-knowledge proofs": {
+      "goal": "Get started with zero-knowledge proofs",
+      "path": [
+        {
+          "step": "Read",
+          "item_title": "Ethereum Layer 2 Scaling Explained",
+          "item_url": "https://youtube.com/watch?v=l2-scaling-2026",
+          "tldr": "Explains how ZK rollups and validity proofs power Ethereum scaling — the motivation behind ZKPs.",
+          "minutes": 15
+        },
+        {
+          "step": "Watch",
+          "item_title": "Zero-Knowledge Proofs for Developers",
+          "item_url": "https://youtube.com/watch?v=zkp-dev-tutorial",
+          "tldr": "Practical walkthrough of ZK proof construction, verification, and common libraries for engineers.",
+          "minutes": 25
+        },
+        {
+          "step": "Practice",
+          "item_title": "Smart Contract Security Audit Lab",
+          "item_url": "https://ethernaut.openzeppelin.com",
+          "tldr": "Audit smart contracts hands-on, building security intuition that complements ZK proof design.",
+          "minutes": 30
+        }
+      ],
+      "rationale": "Begin with the 'why' behind ZKPs via L2 scaling context, then learn the 'how' through a developer-focused tutorial, and finally solidify understanding with hands-on smart contract exercises."
+    }
+  }
+}
