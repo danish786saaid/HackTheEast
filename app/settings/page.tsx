@@ -3,7 +3,6 @@
 import { useState, useEffect } from "react";
 import {
   Link2,
-  ChevronDown,
   Camera,
   Lock,
   LogOut,
@@ -13,15 +12,12 @@ import {
   Sprout,
   Flame,
   Zap,
-  Pencil,
-  Layers,
-  BarChart3,
-  UserCircle2,
   Eye,
   EyeOff,
   X,
   Globe,
   Bell,
+  HelpCircle,
 } from "lucide-react";
 import TopBar from "@/components/layout/TopBar";
 import { useAuth, initials } from "@/lib/auth-context";
@@ -49,7 +45,6 @@ export default function SettingsPage() {
   const [role, setRole] = useState("learner");
   const [interests, setInterests] = useState<string[]>([]);
   const [level, setLevel] = useState("intermediate");
-  const [preferencesExpanded, setPreferencesExpanded] = useState(false);
   const [accountExpanded, setAccountExpanded] = useState(false);
   const [oldPassword, setOldPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
@@ -67,7 +62,7 @@ export default function SettingsPage() {
   useEffect(() => {
     const prefs = loadUserPreferences();
     setRole(prefs.role);
-    setInterests(prefs.interests);
+    setInterests(prefs.interests.slice(0, 3)); // max 3
     setLevel(prefs.level);
   }, []);
 
@@ -84,9 +79,11 @@ export default function SettingsPage() {
   };
 
   const toggleInterest = (topic: string) => {
-    setInterests((prev) =>
-      prev.includes(topic) ? prev.filter((t) => t !== topic) : [...prev, topic],
-    );
+    setInterests((prev) => {
+      if (prev.includes(topic)) return prev.filter((t) => t !== topic);
+      if (prev.length >= 3) return prev;
+      return [...prev, topic];
+    });
   };
 
   const handleChangePassword = (e: React.FormEvent) => {
@@ -110,18 +107,11 @@ export default function SettingsPage() {
     showToast("success", "Password updated.");
   };
 
-  const handleSavePreferences = () => {
-    if (interests.length === 0) {
-      showToast("error", "Select at least one topic.");
-      return;
-    }
+  // Auto-save preferences when role, interests, or level change
+  useEffect(() => {
+    if (interests.length === 0) return;
     saveUserPreferences({ role, interests, level });
-    showToast("success", "Preferences saved.");
-    setPreferencesExpanded(false);
-  };
-
-  const roleLabel = ROLES.find((r) => r.id === role)?.label ?? role;
-  const levelLabel = LEVELS.find((l) => l.id === level)?.label ?? level;
+  }, [role, interests, level]);
 
   const handleAvatarClick = () => {
     const input = document.createElement("input");
@@ -151,49 +141,50 @@ export default function SettingsPage() {
       type="button"
       onClick={onToggle}
       disabled={!user}
-      className={`relative h-5 w-9 shrink-0 rounded-full transition-colors disabled:opacity-50 ${
-        value ? "bg-[#3b82f6]" : "bg-gray-300"
+      className={`relative h-5 w-9 shrink-0 transition-colors disabled:opacity-50 ${
+        value ? "bg-[#3b82f6]" : "bg-white/20"
       }`}
     >
       <span
-        className={`absolute top-0.5 left-0.5 h-4 w-4 rounded-full bg-white shadow-sm transition-transform ${
+        className={`absolute top-0.5 left-0.5 h-4 w-4 bg-white shadow-sm transition-transform ${
           value ? "translate-x-4" : "translate-x-0"
         }`}
       />
     </button>
   );
 
+  const cardHover =
+    "transition-all duration-200 hover:border-[#3b82f6]/40 hover:shadow-[0_0_24px_rgba(59,130,246,0.08)]";
+
   return (
     <>
       <TopBar />
       <div
-        className="min-h-[calc(100vh-56px)] w-full bg-zinc-900 px-4 py-6 sm:px-6 sm:py-8"
-        style={{
-          backgroundImage:
-            "radial-gradient(ellipse 80% 50% at 50% 0%, rgba(59,130,246,0.07) 0%, transparent 60%)",
-        }}
+        className="min-h-[calc(100vh-56px)] w-full px-4 py-6 sm:px-6 sm:py-8"
+        style={{ background: "#0c0a09" }}
       >
         <div className="mx-auto w-full max-w-5xl">
-          {/* Header */}
           <div className="mb-6">
-            <h1 className="text-2xl font-bold text-gray-100 tracking-tight">
+            <h1 className="text-2xl font-bold text-white tracking-tight">
               Settings
             </h1>
-            <p className="mt-1 text-sm text-gray-400">
+            <p className="mt-1 text-sm text-[#78716c]">
               Manage your account, preferences, and integrations.
             </p>
           </div>
 
-          {/* ── Bento Grid ── */}
-          <div className="grid grid-cols-4 gap-3 auto-rows-min">
-            {/* ── Profile — 2 cols, 2 rows ── */}
-            <div className="col-span-2 row-span-2 bg-white p-5 flex flex-col transition-transform duration-200 hover:scale-[1.02]">
-              <form onSubmit={handleSaveProfile} className="flex flex-col flex-1">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4 lg:auto-rows-auto">
+
+            {/* ═══ ROW 1: Profile (2) | Experience (2) ═══ */}
+            <div
+              className={`border border-white/[0.08] bg-white p-5 sm:col-span-2 lg:col-span-2 ${cardHover}`}
+            >
+              <form onSubmit={handleSaveProfile} className="flex flex-col">
                 <div className="flex items-start gap-4">
                   <button
                     type="button"
                     onClick={handleAvatarClick}
-                    className="relative flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-full bg-[#3b82f6] text-xl font-bold text-white"
+                    className="relative flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden bg-[#3b82f6] text-xl font-bold text-white"
                   >
                     {avatarUrl ? (
                       <img
@@ -204,7 +195,7 @@ export default function SettingsPage() {
                     ) : (
                       initialLetters
                     )}
-                    <span className="absolute bottom-0 right-0 flex h-5 w-5 items-center justify-center rounded-full bg-blue-600 text-white">
+                    <span className="absolute bottom-0 right-0 flex h-5 w-5 items-center justify-center bg-[#2563eb] text-white">
                       <Camera className="h-2.5 w-2.5" />
                     </span>
                   </button>
@@ -222,8 +213,6 @@ export default function SettingsPage() {
                     />
                   </div>
                 </div>
-
-                {/* Profile details */}
                 <div className="mt-4 space-y-3">
                   <div>
                     <p className="text-[10px] font-semibold uppercase tracking-widest text-gray-400">
@@ -246,82 +235,138 @@ export default function SettingsPage() {
                       Member since
                     </p>
                     <p className="mt-1 text-sm text-gray-900">
-                      {new Date().toLocaleDateString("en-US", { month: "long", year: "numeric" })}
+                      {new Date().toLocaleDateString("en-US", {
+                        month: "long",
+                        year: "numeric",
+                      })}
                     </p>
                   </div>
                 </div>
-
                 {user && (
                   <button
                     type="submit"
-                    className="mt-auto w-full bg-[#3b82f6] py-2.5 text-sm font-semibold text-white hover:bg-[#2563eb] transition-colors"
+                    className="mt-4 w-full bg-[#3b82f6] py-2.5 text-sm font-semibold text-white transition-colors hover:bg-[#2563eb]"
                   >
                     Save profile
                   </button>
                 )}
-              </form>
-
-              {/* Change password button */}
-              <button
-                type="button"
-                onClick={() => setAccountExpanded(true)}
-                className="flex w-full items-center gap-2 border-t border-gray-200 px-0 pt-4 mt-4 text-left"
-              >
-                <Lock className="h-3.5 w-3.5 text-gray-400" />
-                <span className="text-sm font-medium text-gray-700">
-                  Change password
-                </span>
-              </button>
-            </div>
-
-            {/* ── Role & Level ── */}
-            <div className="col-span-2 bg-white p-5 transition-transform duration-200 hover:scale-[1.02]">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <UserCircle2 className="h-4 w-4 text-gray-400" />
-                  <p className="text-[10px] font-semibold uppercase tracking-widest text-gray-400">
-                    Your Role
-                  </p>
-                </div>
                 <button
                   type="button"
-                  onClick={() => setPreferencesExpanded(true)}
-                  className="flex items-center gap-1 text-xs font-medium text-[#3b82f6] hover:text-blue-400 transition-colors"
+                  onClick={() => setAccountExpanded(true)}
+                  className="mt-3 flex w-full items-center gap-2 border-t border-gray-200 pt-4 text-left text-gray-600 transition-colors hover:text-[#3b82f6]"
                 >
-                  <Pencil className="h-3 w-3" />
-                  Edit
+                  <Lock className="h-3.5 w-3.5" />
+                  <span className="text-sm font-medium">Change password</span>
                 </button>
-              </div>
-              <p className="mt-3 text-3xl font-bold text-gray-900">{roleLabel}</p>
-              <div className="mt-4 flex items-center gap-6 border-t border-gray-200 pt-4">
-                <div>
-                  <p className="text-[10px] font-semibold uppercase tracking-widest text-gray-400">
-                    Level
-                  </p>
-                  <p className="mt-1 text-xl font-bold text-gray-900">
-                    {levelLabel}
-                  </p>
-                </div>
-                <div className="border-l border-gray-200 pl-6">
-                  <p className="text-[10px] font-semibold uppercase tracking-widest text-gray-400">
-                    Topics
-                  </p>
-                  <p className="mt-1 text-xl font-bold text-gray-900">
-                    {interests.length}
-                  </p>
-                </div>
+              </form>
+            </div>
+
+            <div
+              className={`border border-white/[0.08] bg-white p-5 sm:col-span-2 lg:col-span-2 ${cardHover}`}
+            >
+              <h3 className="text-sm font-semibold text-gray-900">
+                Experience level
+              </h3>
+              <p className="mt-1 text-xs text-gray-500">
+                We&apos;ll adapt the depth and complexity of your learning paths.
+              </p>
+              <div className="mt-3 space-y-2">
+                {LEVELS.map((l) => {
+                  const Icon =
+                    l.id === "beginner"
+                      ? Sprout
+                      : l.id === "intermediate"
+                        ? Flame
+                        : Zap;
+                  const isSelected = level === l.id;
+                  return (
+                    <button
+                      key={l.id}
+                      type="button"
+                      onClick={() => setLevel(l.id)}
+                      className={`flex w-full items-start gap-3 border p-3 text-left transition-all ${
+                        isSelected
+                          ? "border-[#3b82f6] bg-[#3b82f6]/10"
+                          : "border-gray-200 bg-gray-50/50 hover:border-[#3b82f6]/40 hover:bg-[#3b82f6]/5"
+                      }`}
+                    >
+                      <Icon
+                        className={`mt-0.5 h-4 w-4 shrink-0 ${
+                          isSelected ? "text-[#3b82f6]" : "text-gray-400"
+                        }`}
+                      />
+                      <div>
+                        <p
+                          className={`text-sm font-medium ${
+                            isSelected ? "text-[#3b82f6]" : "text-gray-400"
+                          }`}
+                        >
+                          {l.label}
+                        </p>
+                        <p className="mt-0.5 text-[11px] text-gray-500">
+                          {l.description}
+                        </p>
+                      </div>
+                    </button>
+                  );
+                })}
               </div>
             </div>
 
-            {/* ── Notifications ── */}
-            <div className="col-span-2 bg-white p-5 transition-transform duration-200 hover:scale-[1.02]">
-              <div className="flex items-center gap-2 mb-4">
-                <Bell className="h-4 w-4 text-gray-400" />
+            {/* ═══ ROW 2: Topics (3) | Notifications (1) ═══ */}
+            <div
+              className={`border border-white/[0.08] bg-white p-5 sm:col-span-2 lg:col-span-3 ${cardHover}`}
+            >
+              <h3 className="text-sm font-semibold text-gray-900">
+                Topics of interest
+              </h3>
+              <p className="mt-1 text-xs text-gray-500">
+                Select up to 3. We use these to curate your content feed and
+                learning paths.
+              </p>
+              <div className="mt-3 flex flex-wrap gap-2">
+                {TOPICS.map((topic) => {
+                  const isSelected = interests.includes(topic);
+                  const isDisabled = !isSelected && interests.length >= 3;
+                  return (
+                    <button
+                      key={topic}
+                      type="button"
+                      onClick={() => toggleInterest(topic)}
+                      disabled={isDisabled}
+                      className={`px-3 py-1.5 text-xs font-medium transition-all disabled:opacity-40 disabled:cursor-not-allowed ${
+                        isSelected
+                          ? "bg-[#3b82f6] text-white"
+                          : "border border-gray-200 bg-gray-50/50 text-gray-600 hover:border-[#3b82f6]/40 hover:bg-[#3b82f6]/5 hover:text-[#3b82f6]"
+                      }`}
+                    >
+                      {topic}
+                    </button>
+                  );
+                })}
+              </div>
+              {interests.length === 0 && (
+                <p className="mt-2 text-[11px] text-amber-600">
+                  Select at least one topic (max 3).
+                </p>
+              )}
+              {interests.length >= 3 && (
+                <p className="mt-2 text-[11px] text-gray-500">
+                  Maximum 3 topics selected.
+                </p>
+              )}
+            </div>
+
+            <div
+              className={`border border-white/[0.08] bg-white p-4 lg:col-span-1 ${cardHover}`}
+            >
+              <div className="flex items-center gap-2 mb-2">
+                <Bell className="h-3.5 w-3.5 text-gray-400" />
                 <p className="text-[10px] font-semibold uppercase tracking-widest text-gray-400">
                   Notifications
                 </p>
               </div>
-              <div className="space-y-3">
+              <div className="space-y-2">
                 {[
                   { label: "Email", value: emailNotif, set: setEmailNotif },
                   { label: "In-app", value: inAppNotif, set: setInAppNotif },
@@ -333,7 +378,7 @@ export default function SettingsPage() {
                 ].map(({ label, value, set }) => (
                   <div
                     key={label}
-                    className="flex items-center justify-between"
+                    className="flex items-center justify-between py-0.5"
                   >
                     <span className="text-sm text-gray-700">{label}</span>
                     <Toggle value={value} onToggle={() => set((v) => !v)} />
@@ -342,9 +387,63 @@ export default function SettingsPage() {
               </div>
             </div>
 
-            {/* ── Language ── */}
-            <div className="col-span-2 bg-white p-5 transition-transform duration-200 hover:scale-[1.02]">
-              <div className="flex items-center gap-2 mb-3">
+            {/* ═══ ROW 3: Role (2) | Language (1) | Integrations (1) ═══ */}
+            <div
+              className={`border border-white/[0.08] bg-white p-5 sm:col-span-2 lg:col-span-2 ${cardHover}`}
+            >
+              <h3 className="text-sm font-semibold text-gray-900">
+                How you use BadgeForge
+              </h3>
+              <p className="mt-1 text-xs text-gray-500">
+                We use this to tailor your experience.
+              </p>
+              <div className="mt-3 space-y-2">
+                {ROLES.map((r) => {
+                  const Icon =
+                    r.id === "learner"
+                      ? GraduationCap
+                      : r.id === "educator"
+                        ? Presentation
+                        : Building2;
+                  const isSelected = role === r.id;
+                  return (
+                    <button
+                      key={r.id}
+                      type="button"
+                      onClick={() => setRole(r.id)}
+                      className={`flex w-full items-start gap-3 border p-3 text-left transition-all ${
+                        isSelected
+                          ? "border-[#3b82f6] bg-[#3b82f6]/10"
+                          : "border-gray-200 bg-gray-50/50 hover:border-[#3b82f6]/40 hover:bg-[#3b82f6]/5"
+                      }`}
+                    >
+                      <Icon
+                        className={`mt-0.5 h-4 w-4 shrink-0 ${
+                          isSelected ? "text-[#3b82f6]" : "text-gray-400"
+                        }`}
+                      />
+                      <div>
+                        <p
+                          className={`text-sm font-medium ${
+                            isSelected ? "text-[#3b82f6]" : "text-gray-400"
+                          }`}
+                        >
+                          {r.label}
+                        </p>
+                        <p className="mt-0.5 text-[11px] text-gray-500">
+                          {r.description}
+                        </p>
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            <div
+              className={`border border-white/[0.08] bg-white p-4 lg:col-span-1 ${cardHover}`}
+            >
+              <div className="flex items-center gap-2 mb-2">
                 <Globe className="h-4 w-4 text-gray-400" />
                 <p className="text-[10px] font-semibold uppercase tracking-widest text-gray-400">
                   Language
@@ -359,7 +458,7 @@ export default function SettingsPage() {
                   <option
                     key={o.value}
                     value={o.value}
-                    className="bg-zinc-900 text-white"
+                    className="bg-[#0c0a09] text-white"
                   >
                     {o.label}
                   </option>
@@ -367,22 +466,23 @@ export default function SettingsPage() {
               </select>
             </div>
 
-            {/* ── Integrations ── */}
-            <div className="col-span-2 bg-white p-5 transition-transform duration-200 hover:scale-[1.02]">
-              <div className="flex items-center gap-2 mb-4">
-                <Link2 className="h-4 w-4 text-gray-400" />
+            <div
+              className={`border border-white/[0.08] bg-white p-4 lg:col-span-1 ${cardHover}`}
+            >
+              <div className="flex items-center gap-2 mb-2">
+                <Link2 className="h-3.5 w-3.5 text-gray-400" />
                 <p className="text-[10px] font-semibold uppercase tracking-widest text-gray-400">
                   Integrations
                 </p>
               </div>
-              <div className="space-y-3">
+              <div className="space-y-2">
                 {["Google", "GitHub"].map((label) => (
                   <div
                     key={label}
-                    className="flex items-center justify-between"
+                    className="flex items-center justify-between py-0.5"
                   >
                     <span className="text-sm text-gray-700">{label}</span>
-                    <button className="text-xs font-medium text-[#3b82f6] hover:text-blue-400 transition-colors">
+                    <button className="text-xs font-medium text-[#3b82f6] transition-colors hover:text-[#2563eb]">
                       Connect
                     </button>
                   </div>
@@ -390,15 +490,35 @@ export default function SettingsPage() {
               </div>
             </div>
 
-            {/* ── Log out ── */}
-            <div className="col-span-4 transition-transform duration-200 hover:scale-[1.01]">
+            {/* ═══ ROW 4: Help (1) | Log out (3) ═══ */}
+            <div
+              className={`border border-white/[0.08] bg-white p-4 lg:col-span-1 ${cardHover}`}
+            >
+              <div className="flex items-center gap-2 mb-2">
+                <HelpCircle className="h-3.5 w-3.5 text-gray-400" />
+                <p className="text-[10px] font-semibold uppercase tracking-widest text-gray-400">
+                  Help & support
+                </p>
+              </div>
+              <p className="text-sm text-gray-700">Need assistance?</p>
+              <a
+                href="mailto:info@oax.org"
+                className="mt-1 block text-xs font-medium text-[#3b82f6] hover:text-[#2563eb]"
+              >
+                Contact support →
+              </a>
+            </div>
+
+            <div
+              className={`flex items-center justify-center border border-white/[0.08] bg-white sm:col-span-2 lg:col-span-3 ${cardHover}`}
+            >
               <button
                 type="button"
                 onClick={() => {
                   logout();
                   window.location.href = "/onboarding";
                 }}
-                className="flex w-full items-center justify-center gap-2 bg-white py-3 text-sm font-medium text-gray-400 hover:bg-[#3b82f6] hover:text-white transition-all"
+                className="flex w-full h-full items-center justify-center gap-2 p-4 text-sm font-medium text-gray-500 transition-colors hover:text-[#3b82f6]"
               >
                 <LogOut className="h-3.5 w-3.5" />
                 Log out
@@ -408,188 +528,18 @@ export default function SettingsPage() {
         </div>
       </div>
 
-      {/* ── Preferences Modal ── */}
-      {preferencesExpanded && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
-          <div className="w-full max-w-2xl max-h-[85vh] overflow-y-auto bg-zinc-800 shadow-2xl">
-            {/* Modal header */}
-            <div className="sticky top-0 z-10 flex items-center justify-between bg-zinc-800 border-b border-zinc-700 px-6 py-4">
-              <h2 className="text-lg font-bold text-white">
-                Edit Preferences
+      {/* ── Change Password Modal ── */}
+      {accountExpanded && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
+          <div className={`w-full max-w-md border border-white/[0.08] bg-white shadow-2xl ${cardHover}`}>
+            <div className="flex items-center justify-between border-b border-gray-200 px-6 py-4">
+              <h2 className="text-lg font-bold text-gray-900">
+                Change Password
               </h2>
               <button
                 type="button"
-                onClick={() => setPreferencesExpanded(false)}
-                className="text-gray-400 hover:text-white transition-colors"
-              >
-                <X className="h-5 w-5" />
-              </button>
-            </div>
-
-            <div className="px-6 py-5 space-y-6">
-              {/* Role */}
-              <div>
-                <h3 className="text-sm font-semibold text-white">
-                  How you use BadgeForge
-                </h3>
-                <p className="mt-1 text-xs text-gray-400">
-                  We use this to tailor your experience.
-                </p>
-                <div className="mt-3 space-y-2">
-                  {ROLES.map((r) => {
-                    const Icon =
-                      r.id === "learner"
-                        ? GraduationCap
-                        : r.id === "educator"
-                          ? Presentation
-                          : Building2;
-                    const isSelected = role === r.id;
-                    return (
-                      <button
-                        key={r.id}
-                        type="button"
-                        onClick={() => setRole(r.id)}
-                        className={`flex w-full items-start gap-3 border p-3 text-left transition-colors ${
-                          isSelected
-                            ? "border-[#3b82f6] bg-[#3b82f6]/10"
-                            : "border-zinc-700 hover:border-zinc-600"
-                        }`}
-                      >
-                        <Icon
-                          className={`mt-0.5 h-4 w-4 shrink-0 ${isSelected ? "text-[#3b82f6]" : "text-gray-400"}`}
-                        />
-                        <div>
-                          <p
-                            className={`text-sm font-medium ${isSelected ? "text-[#3b82f6]" : "text-gray-700"}`}
-                          >
-                            {r.label}
-                          </p>
-                          <p className="mt-0.5 text-[11px] text-gray-400">
-                            {r.description}
-                          </p>
-                        </div>
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-
-              {/* Topics */}
-              <div>
-                <h3 className="text-sm font-semibold text-white">
-                  Topics of interest
-                </h3>
-                <p className="mt-1 text-xs text-gray-400">
-                  Select at least one. We use these to curate your content feed
-                  and learning paths.
-                </p>
-                <div className="mt-3 flex flex-wrap gap-2">
-                  {TOPICS.map((topic) => {
-                    const isSelected = interests.includes(topic);
-                    return (
-                      <button
-                        key={topic}
-                        type="button"
-                        onClick={() => toggleInterest(topic)}
-                        className={`px-3 py-1.5 text-xs font-medium transition-colors ${
-                          isSelected
-                            ? "bg-[#3b82f6] text-white"
-                            : "border border-zinc-700 text-zinc-400 hover:border-zinc-500 hover:text-zinc-200"
-                        }`}
-                      >
-                        {topic}
-                      </button>
-                    );
-                  })}
-                </div>
-                {interests.length === 0 && (
-                  <p className="mt-2 text-[11px] text-amber-400">
-                    Select at least one topic.
-                  </p>
-                )}
-              </div>
-
-              {/* Level */}
-              <div>
-                <h3 className="text-sm font-semibold text-white">
-                  Experience level
-                </h3>
-                <p className="mt-1 text-xs text-gray-400">
-                  We&apos;ll adapt the depth and complexity of your learning
-                  paths.
-                </p>
-                <div className="mt-3 space-y-2">
-                  {LEVELS.map((l) => {
-                    const Icon =
-                      l.id === "beginner"
-                        ? Sprout
-                        : l.id === "intermediate"
-                          ? Flame
-                          : Zap;
-                    const isSelected = level === l.id;
-                    return (
-                      <button
-                        key={l.id}
-                        type="button"
-                        onClick={() => setLevel(l.id)}
-                        className={`flex w-full items-start gap-3 border p-3 text-left transition-colors ${
-                          isSelected
-                            ? "border-[#3b82f6] bg-[#3b82f6]/10"
-                            : "border-zinc-700 hover:border-zinc-600"
-                        }`}
-                      >
-                        <Icon
-                          className={`mt-0.5 h-4 w-4 shrink-0 ${isSelected ? "text-[#3b82f6]" : "text-gray-400"}`}
-                        />
-                        <div>
-                          <p
-                            className={`text-sm font-medium ${isSelected ? "text-[#3b82f6]" : "text-gray-700"}`}
-                          >
-                            {l.label}
-                          </p>
-                          <p className="mt-0.5 text-[11px] text-gray-400">
-                            {l.description}
-                          </p>
-                        </div>
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-            </div>
-
-            {/* Modal footer */}
-            <div className="sticky bottom-0 flex gap-3 border-t border-zinc-700 bg-zinc-800 px-6 py-4">
-              <button
-                type="button"
-                onClick={handleSavePreferences}
-                className="flex-1 bg-[#3b82f6] py-2.5 text-sm font-semibold text-white hover:bg-[#2563eb] transition-colors"
-              >
-                Save preferences
-              </button>
-              <button
-                type="button"
-                onClick={() => setPreferencesExpanded(false)}
-                className="border border-zinc-700 px-5 py-2.5 text-sm font-semibold text-zinc-400 hover:bg-zinc-700 hover:text-white transition-colors"
-              >
-                Cancel
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* ── Change Password Modal ── */}
-      {accountExpanded && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
-          <div className="w-full max-w-md max-h-[85vh] overflow-y-auto bg-zinc-800 shadow-2xl">
-            {/* Modal header */}
-            <div className="sticky top-0 z-10 flex items-center justify-between bg-zinc-800 border-b border-zinc-700 px-6 py-4">
-              <h2 className="text-lg font-bold text-white">Change Password</h2>
-              <button
-                type="button"
                 onClick={() => setAccountExpanded(false)}
-                className="text-zinc-500 hover:text-white transition-colors"
+                className="text-gray-400 transition-colors hover:text-gray-600"
               >
                 <X className="h-5 w-5" />
               </button>
@@ -597,7 +547,7 @@ export default function SettingsPage() {
 
             <form onSubmit={handleChangePassword} className="px-6 py-5 space-y-4">
               <div>
-                <label className="text-xs text-zinc-500">
+                <label className="text-[10px] font-semibold uppercase tracking-widest text-gray-400">
                   Current password
                 </label>
                 <div className="relative mt-1">
@@ -605,13 +555,13 @@ export default function SettingsPage() {
                     type={showPassword ? "text" : "password"}
                     value={oldPassword}
                     onChange={(e) => setOldPassword(e.target.value)}
-                    className="w-full border border-zinc-700 bg-zinc-800 px-3 py-2.5 pr-9 text-sm text-white placeholder-zinc-500 focus:border-[#3b82f6] focus:outline-none"
+                    className="w-full border border-gray-200 bg-gray-50/50 px-3 py-2.5 pr-9 text-sm text-gray-900 placeholder-gray-400 focus:border-[#3b82f6] focus:outline-none"
                     placeholder="Enter current password"
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword((v) => !v)}
-                    className="absolute right-2.5 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-zinc-300"
+                    className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
                   >
                     {showPassword ? (
                       <EyeOff className="h-3.5 w-3.5" />
@@ -622,53 +572,50 @@ export default function SettingsPage() {
                 </div>
               </div>
               <div>
-                <label className="text-xs text-zinc-500">
+                <label className="text-[10px] font-semibold uppercase tracking-widest text-gray-400">
                   New password
                 </label>
                 <input
                   type={showPassword ? "text" : "password"}
                   value={newPassword}
                   onChange={(e) => setNewPassword(e.target.value)}
-                  className="mt-1 w-full border border-zinc-700 bg-zinc-800 px-3 py-2.5 text-sm text-white placeholder-zinc-500 focus:border-[#3b82f6] focus:outline-none"
+                  className="mt-1 w-full border border-gray-200 bg-gray-50/50 px-3 py-2.5 text-sm text-gray-900 placeholder-gray-400 focus:border-[#3b82f6] focus:outline-none"
                   placeholder="Min 8 characters"
                 />
               </div>
               <div>
-                <label className="text-xs text-zinc-500">
+                <label className="text-[10px] font-semibold uppercase tracking-widest text-gray-400">
                   Confirm new password
                 </label>
                 <input
                   type={showPassword ? "text" : "password"}
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
-                  className="mt-1 w-full border border-zinc-700 bg-zinc-800 px-3 py-2.5 text-sm text-white placeholder-zinc-500 focus:border-[#3b82f6] focus:outline-none"
+                  className="mt-1 w-full border border-gray-200 bg-gray-50/50 px-3 py-2.5 text-sm text-gray-900 placeholder-gray-400 focus:border-[#3b82f6] focus:outline-none"
                   placeholder="Re-enter new password"
                 />
               </div>
-            </form>
 
-            {/* Modal footer */}
-            <div className="sticky bottom-0 flex gap-3 border-t border-zinc-700 bg-zinc-800 px-6 py-4">
-              <button
-                type="button"
-                onClick={(e) => { e.preventDefault(); handleChangePassword(e as unknown as React.FormEvent); }}
-                className="flex-1 bg-[#3b82f6] py-2.5 text-sm font-semibold text-white hover:bg-[#2563eb] transition-colors"
-              >
-                Update password
-              </button>
-              <button
-                type="button"
-                onClick={() => setAccountExpanded(false)}
-                className="border border-zinc-700 px-5 py-2.5 text-sm font-semibold text-zinc-400 hover:bg-zinc-700 hover:text-white transition-colors"
-              >
-                Cancel
-              </button>
-            </div>
+              <div className="flex gap-3 pt-2">
+                <button
+                  type="submit"
+                  className="flex-1 bg-[#3b82f6] py-2.5 text-sm font-semibold text-white transition-colors hover:bg-[#2563eb]"
+                >
+                  Update password
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setAccountExpanded(false)}
+                  className="border border-gray-200 px-5 py-2.5 text-sm font-semibold text-gray-600 transition-colors hover:border-[#3b82f6]/40 hover:bg-[#3b82f6]/5 hover:text-[#3b82f6]"
+                >
+                  Cancel
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}
 
-      {/* Toast */}
       {toast && (
         <div
           className="fixed bottom-6 left-1/2 z-[60] -translate-x-1/2 px-5 py-2.5 text-sm font-medium text-white shadow-lg"
