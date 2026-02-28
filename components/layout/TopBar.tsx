@@ -61,7 +61,7 @@ export default function TopBar() {
     logout();
     setUserMenuOpen(false);
     setNotifsOpen(false);
-    router.push("/onboarding");
+    router.push("/onboarding/login");
     router.refresh();
   }
 

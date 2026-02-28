@@ -18,8 +18,6 @@ export default function OnboardingPage() {
     user,
     isAuthenticated,
     completeOnboarding,
-    signInWithOAuth,
-    signInWithEmail,
     saveOnboardingPrefs,
     getGuestOnboardingPrefs,
   } = useAuth();
@@ -28,8 +26,6 @@ export default function OnboardingPage() {
   const [profileType, setProfileType] = useState<ProfileType | null>(null);
   const [interests, setInterests] = useState<string[]>([]);
   const [experienceLevel, setExperienceLevel] = useState<ExperienceLevel | null>(null);
-  const [authError, setAuthError] = useState<string | null>(null);
-  const [emailSent, setEmailSent] = useState(false);
 
   // Restore guest onboarding state after OAuth redirect
   useEffect(() => {
@@ -44,50 +40,11 @@ export default function OnboardingPage() {
   const next = useCallback(() => setStep((s) => Math.min(s + 1, TOTAL_STEPS - 1)), []);
   const back = useCallback(() => setStep((s) => Math.max(s - 1, 0)), []);
 
-  // Cache guest state before any auth redirect so it survives the round-trip
-  const cacheCurrentState = useCallback(() => {
-    saveOnboardingPrefs({ profileType, interests, experienceLevel });
-  }, [saveOnboardingPrefs, profileType, interests, experienceLevel]);
-
   const handleComplete = useCallback(async () => {
     await saveOnboardingPrefs({ profileType, interests, experienceLevel });
     completeOnboarding();
     router.push("/");
   }, [saveOnboardingPrefs, completeOnboarding, router, profileType, interests, experienceLevel]);
-
-  const handleAuthGoogle = useCallback(async () => {
-    try {
-      setAuthError(null);
-      cacheCurrentState();
-      await signInWithOAuth("google");
-    } catch (err) {
-      setAuthError((err as Error).message);
-    }
-  }, [signInWithOAuth, cacheCurrentState]);
-
-  const handleAuthApple = useCallback(async () => {
-    try {
-      setAuthError(null);
-      cacheCurrentState();
-      await signInWithOAuth("apple");
-    } catch (err) {
-      setAuthError((err as Error).message);
-    }
-  }, [signInWithOAuth, cacheCurrentState]);
-
-  const handleAuthEmail = useCallback(async () => {
-    try {
-      setAuthError(null);
-      setEmailSent(false);
-      const email = window.prompt("Enter your email address:");
-      if (!email) return;
-      cacheCurrentState();
-      await signInWithEmail(email);
-      setEmailSent(true);
-    } catch (err) {
-      setAuthError((err as Error).message);
-    }
-  }, [signInWithEmail, cacheCurrentState]);
 
   return (
     <OnboardingLayout step={step} totalSteps={TOTAL_STEPS}>
@@ -136,20 +93,7 @@ export default function OnboardingPage() {
               experienceLevel={experienceLevel}
               onBack={back}
               onComplete={handleComplete}
-              onAuthGoogle={handleAuthGoogle}
-              onAuthApple={handleAuthApple}
-              onAuthEmail={handleAuthEmail}
             />
-            {emailSent && (
-              <p className="mt-4 text-center text-sm text-blue-400">
-                Magic link sent! Check your email and click the link to sign in.
-              </p>
-            )}
-            {authError && (
-              <p className="mt-4 text-center text-sm text-red-400">
-                {authError}
-              </p>
-            )}
           </>
         )}
       </div>
