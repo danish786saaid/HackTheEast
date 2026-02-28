@@ -2,7 +2,7 @@
 
 import { useState, useCallback, useEffect } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Eye, EyeOff } from "lucide-react";
 import AuthPageLayout from "@/components/onboarding/AuthPageLayout";
 import { useAuth } from "@/lib/auth-context";
@@ -15,19 +15,19 @@ const STEPS = [
 
 export default function LoginPage() {
   const router = useRouter();
-  const { user, onboardingComplete, login, signInWithOAuth } = useAuth();
+  const searchParams = useSearchParams();
+  const { user, login, signInWithOAuth } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(searchParams?.get("error") ?? null);
   const [loading, setLoading] = useState(false);
 
-  // Redirect if already authenticated
+  // Redirect if already authenticated — go to dashboard, not onboarding
   useEffect(() => {
     if (!user) return;
-    if (onboardingComplete) router.replace("/");
-    else router.replace("/onboarding");
-  }, [user, onboardingComplete, router]);
+    router.replace("/");
+  }, [user, router]);
 
   const handleSubmit = useCallback(
     async (e: React.FormEvent) => {
@@ -36,30 +36,20 @@ export default function LoginPage() {
       setLoading(true);
       try {
         await login(email.trim(), password);
-        if (onboardingComplete) router.replace("/");
-        else router.replace("/onboarding");
+        router.replace("/");
       } catch (err) {
         setError((err as Error).message);
       } finally {
         setLoading(false);
       }
     },
-    [email, password, login, onboardingComplete, router]
+    [email, password, login, router]
   );
 
   const handleGoogle = useCallback(async () => {
     setError(null);
     try {
       await signInWithOAuth("google");
-    } catch (err) {
-      setError((err as Error).message);
-    }
-  }, [signInWithOAuth]);
-
-  const handleApple = useCallback(async () => {
-    setError(null);
-    try {
-      await signInWithOAuth("apple");
     } catch (err) {
       setError((err as Error).message);
     }
@@ -79,20 +69,13 @@ export default function LoginPage() {
         Enter your credentials to access your account.
       </p>
 
-      <div className="mt-8 flex gap-3">
+      <div className="mt-8">
         <button
           type="button"
           onClick={handleGoogle}
-          className="flex-1 border border-[var(--glass-border)] bg-white/[0.04] py-3 px-4 text-sm font-medium text-white rounded-none transition-colors hover:border-white/[0.12] hover:bg-white/[0.06]"
+          className="w-full border border-[var(--glass-border)] bg-white/[0.04] py-3 px-4 text-sm font-medium text-white rounded-none transition-colors hover:border-white/[0.12] hover:bg-white/[0.06]"
         >
           Google
-        </button>
-        <button
-          type="button"
-          onClick={handleApple}
-          className="flex-1 border border-[var(--glass-border)] bg-white/[0.04] py-3 px-4 text-sm font-medium text-white rounded-none transition-colors hover:border-white/[0.12] hover:bg-white/[0.06]"
-        >
-          Apple
         </button>
       </div>
 

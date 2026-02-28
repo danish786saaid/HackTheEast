@@ -15,7 +15,7 @@ const STEPS = [
 
 export default function RegisterPage() {
   const router = useRouter();
-  const { user, onboardingComplete, register: doRegister, signInWithOAuth } = useAuth();
+  const { user, register: doRegister, signInWithOAuth } = useAuth();
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
@@ -24,12 +24,11 @@ export default function RegisterPage() {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
-  // Redirect if already authenticated
+  // Redirect if already authenticated — go to dashboard, not onboarding
   useEffect(() => {
     if (!user) return;
-    if (onboardingComplete) router.replace("/");
-    else router.replace("/onboarding");
-  }, [user, onboardingComplete, router]);
+    router.replace("/");
+  }, [user, router]);
 
   const handleSubmit = useCallback(
     async (e: React.FormEvent) => {
@@ -42,31 +41,24 @@ export default function RegisterPage() {
       setLoading(true);
       try {
         const name = [firstName.trim(), lastName.trim()].filter(Boolean).join(" ") || "User";
-        await doRegister(name, email.trim(), password);
-        if (onboardingComplete) router.replace("/");
-        else router.replace("/onboarding");
+        await doRegister(name, email.trim(), password, {
+          first_name: firstName.trim(),
+          last_name: lastName.trim(),
+        });
+        router.replace("/");
       } catch (err) {
         setError((err as Error).message);
       } finally {
         setLoading(false);
       }
     },
-    [firstName, lastName, email, password, doRegister, onboardingComplete, router]
+    [firstName, lastName, email, password, doRegister, router]
   );
 
   const handleGoogle = useCallback(async () => {
     setError(null);
     try {
       await signInWithOAuth("google");
-    } catch (err) {
-      setError((err as Error).message);
-    }
-  }, [signInWithOAuth]);
-
-  const handleApple = useCallback(async () => {
-    setError(null);
-    try {
-      await signInWithOAuth("apple");
     } catch (err) {
       setError((err as Error).message);
     }
@@ -86,20 +78,13 @@ export default function RegisterPage() {
         Enter your personal data to create your account.
       </p>
 
-      <div className="mt-8 flex gap-3">
+      <div className="mt-8">
         <button
           type="button"
           onClick={handleGoogle}
-          className="flex-1 border border-[var(--glass-border)] bg-white/[0.04] py-3 px-4 text-sm font-medium text-white rounded-none transition-colors hover:border-white/[0.12] hover:bg-white/[0.06]"
+          className="w-full border border-[var(--glass-border)] bg-white/[0.04] py-3 px-4 text-sm font-medium text-white rounded-none transition-colors hover:border-white/[0.12] hover:bg-white/[0.06]"
         >
           Google
-        </button>
-        <button
-          type="button"
-          onClick={handleApple}
-          className="flex-1 border border-[var(--glass-border)] bg-white/[0.04] py-3 px-4 text-sm font-medium text-white rounded-none transition-colors hover:border-white/[0.12] hover:bg-white/[0.06]"
-        >
-          Apple
         </button>
       </div>
 

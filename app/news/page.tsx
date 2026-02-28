@@ -334,68 +334,66 @@ export default function NewsPage() {
                 <button
                   key={article.id}
                   onClick={() => openArticle(article)}
-                  className="group flex flex-col overflow-hidden bg-black text-left transition-all duration-200 hover:shadow-lg hover:shadow-black/30"
+                  className="group flex min-h-[220px] flex-row overflow-hidden bg-white text-left shadow-sm transition-all duration-200 hover:shadow-md"
                 >
-                  <div className="relative h-48 w-full overflow-hidden bg-black">
-                    {showImage ? (
-                      <img
-                        src={article.image!}
-                        alt=""
-                        className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
-                        onError={() => onImageError(article.id)}
-                      />
-                    ) : (
-                      <PlaceholderThumb
-                        title={article.title}
-                        source={article.source}
-                      />
-                    )}
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
-                    <div className="absolute bottom-0 left-0 right-0 flex flex-wrap items-center gap-2 p-3 text-xs">
+                  <div className="relative flex min-w-0 flex-1 flex-col overflow-visible p-6 pb-14">
+                    <div className="mb-2 flex flex-wrap items-center gap-2 text-xs font-semibold uppercase tracking-widest text-blue-600">
                       {article.provider === "Market Movers" && (
-                        <span className="inline-flex items-center gap-1 rounded bg-red-500/30 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-red-300 backdrop-blur-sm">
+                        <span className="inline-flex items-center gap-1 rounded bg-blue-500/15 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-blue-600">
                           <Zap className="h-2.5 w-2.5" />
                           Market Mover
                         </span>
                       )}
-                      {hasFullContent && (
-                        <span className="inline-flex items-center gap-1 rounded bg-emerald-500/30 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-emerald-300 backdrop-blur-sm">
-                          <FileText className="h-2.5 w-2.5" />
-                          Full Article
-                        </span>
-                      )}
                       {article.source && (
-                        <span className="font-medium text-white/90">
-                          {article.source}
-                        </span>
+                        <span>{article.source}</span>
                       )}
                       {article.publishedAt && (
                         <>
-                          <span className="text-white/30">·</span>
-                          <span className="inline-flex items-center gap-1 text-white/60">
+                          <span className="text-blue-600/60">·</span>
+                          <span className="inline-flex items-center gap-1 text-blue-600/80">
                             <Clock className="h-3 w-3" />
                             {timeAgo(article.publishedAt)}
                           </span>
                         </>
                       )}
                     </div>
-                  </div>
 
-                  <div className="flex flex-1 flex-col bg-white p-5">
-                    <h3 className="text-[15px] font-semibold leading-snug text-gray-900 line-clamp-2 group-hover:text-black">
+                    <h3 className="text-xl font-bold leading-snug tracking-tight text-gray-900 line-clamp-4 group-hover:text-gray-950">
                       {article.title}
                     </h3>
 
                     {article.description && (
-                      <p className="mt-2 flex-1 text-[13px] leading-relaxed text-gray-500 line-clamp-3">
+                      <p className="mt-2 text-base leading-relaxed text-gray-500 line-clamp-3">
                         {article.description}
                       </p>
                     )}
 
-                    <div className="mt-3 inline-flex items-center gap-1.5 text-xs font-medium text-[#2b6cb0] opacity-0 transition-opacity group-hover:opacity-100">
+                    {hasFullContent && (
+                      <span className="absolute bottom-6 left-6 z-10 inline-flex w-fit items-center gap-1.5 rounded bg-emerald-500/20 px-2.5 py-1 text-xs font-semibold uppercase tracking-wider text-emerald-700">
+                        <FileText className="h-3 w-3" />
+                        Full Article
+                      </span>
+                    )}
+
+                    <div className="mt-auto inline-flex items-center gap-1.5 pt-3 text-xs font-medium text-blue-600 opacity-0 transition-opacity group-hover:opacity-100">
                       Read more
                       <ExternalLink className="h-3 w-3" />
                     </div>
+                  </div>
+
+                  <div className="relative w-[180px] shrink-0 self-stretch">
+                    {showImage ? (
+                      <img
+                        src={article.image!}
+                        alt=""
+                        className="h-full w-full object-cover"
+                        onError={() => onImageError(article.id)}
+                      />
+                    ) : (
+                      <div className="flex h-full w-full items-center justify-center bg-gray-100 text-3xl font-bold text-gray-400">
+                        {(article.source || article.title).charAt(0).toUpperCase()}
+                      </div>
+                    )}
                   </div>
                 </button>
               );

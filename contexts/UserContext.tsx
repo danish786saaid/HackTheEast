@@ -1,7 +1,7 @@
 "use client";
 
 import { createContext, useContext, useState, useEffect, ReactNode } from "react";
-import { supabase } from "@/lib/supabaseClient";
+import { createClient } from "@/lib/supabase/client";
 
 export type User = { id: string; name: string | null; email: string | null } | null;
 
@@ -13,12 +13,12 @@ export function UserProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User>(null);
 
   useEffect(() => {
-    const client = supabase;
+    const client = createClient();
     if (!client) {
       setUser(null);
       return;
     }
-    async function loadUser(db: NonNullable<typeof supabase>) {
+    async function loadUser(db: NonNullable<ReturnType<typeof createClient>>) {
       const storedId = typeof window !== "undefined" ? localStorage.getItem(STORAGE_KEY) : null;
       if (storedId) {
         const { data } = await db.from("users").select("id, name, email").eq("id", storedId).maybeSingle();
