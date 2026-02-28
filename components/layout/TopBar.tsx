@@ -49,7 +49,7 @@ export default function TopBar() {
             <div className="flex h-8 w-8 items-center justify-center rounded-lg" style={{ background: "linear-gradient(135deg, #ea580c, #f59e0b)" }}>
               <BookOpen className="h-4 w-4 text-white" />
             </div>
-            <span className="text-lg font-semibold tracking-tight text-white">LearnPulse</span>
+            <span className="text-lg font-semibold tracking-tight text-white">BadgeForge</span>
           </Link>
 
           <nav className="flex gap-1">

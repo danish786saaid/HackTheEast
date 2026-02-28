@@ -6,8 +6,8 @@ import { Providers } from "./providers";
 const inter = Inter({ subsets: ["latin"], weight: ["300", "400", "500", "600", "700"] });
 
 export const metadata: Metadata = {
-  title: "HackTheEast — AI EdTech Platform",
-  description: "AI-powered learning platform with intelligent curation and adaptive paths",
+  title: "BadgeForge — AI-Powered Learning Platform",
+  description: "Intelligent curation, MiniMax-generated tutorials, and adaptive learning paths",
 };
 
 export default function RootLayout({

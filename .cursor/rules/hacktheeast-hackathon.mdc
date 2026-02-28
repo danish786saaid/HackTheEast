@@ -21,7 +21,7 @@ alwaysApply: true
 
 ---
 
-**Our solution — LearnPulse:** AI-powered EdTech platform that uses Exa AI for content discovery, MiniMax for rich tutorial/media generation, and a RevisionDojo-style completion system with badges. "Catch me up" summarises what changed in your tracked domains.
+**Our solution — BadgeForge:** AI-powered EdTech platform that uses Exa AI for content discovery, MiniMax for rich tutorial/media generation, and a RevisionDojo-style completion system with badges. "Catch me up" summarises what changed in your tracked domains.
 
 **Key APIs:** Exa AI (semantic search), MiniMax (M2.5 LLM, Hailuo video, Music 2.5, Speech 2.8), Supabase (data).
 
