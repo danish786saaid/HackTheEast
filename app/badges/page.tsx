@@ -1,7 +1,6 @@
 "use client";
 
 import TopBar from "@/components/layout/TopBar";
-import { useState } from "react";
 import { MOCK_BADGES } from "@/lib/constants";
 import type { BadgeStepStatus } from "@/lib/constants";
 import {
@@ -13,11 +12,10 @@ import {
   Layers,
   Shield,
   Wallet,
-  Lock,
-  MoreHorizontal,
 } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
 
-const ICON_MAP: Record<string, React.ComponentType<{ className?: string }>> = {
+const ICON_MAP = {
   Brain,
   Coins,
   Globe,
@@ -25,48 +23,57 @@ const ICON_MAP: Record<string, React.ComponentType<{ className?: string }>> = {
   Wallet,
   Shield,
   Layers,
-};
+} as const;
 
-const MORPH_DELAYS = [0, 1.4, 2.8, 0.7, 2.1, 3.5, 1];
+type IconName = keyof typeof ICON_MAP;
 
-function statusOf(badge: (typeof MOCK_BADGES)[number]) {
-  if (badge.achieved) return "completed" as const;
-  if (badge.steps.some((s) => s.status === "active")) return "active" as const;
-  return "locked" as const;
+function statusLabel(achieved: boolean, inProgress: boolean) {
+  if (achieved) return "Achieved";
+  if (inProgress) return "In Progress";
+  return "Locked";
 }
 
-function accentFor(status: "completed" | "active" | "locked") {
-  if (status === "completed") return "#22c55e";
-  if (status === "active") return "#3b82f6";
+function progressColor(achieved: boolean, inProgress: boolean) {
+  if (achieved) return "#22c55e";
+  if (inProgress) return "#3b82f6";
   return "#78716c";
 }
 
-function StepRow({ label, status }: { label: string; status: BadgeStepStatus }) {
+function StepRow({
+  label,
+  status,
+}: {
+  label: string;
+  status: BadgeStepStatus;
+}) {
+  const isCompleted = status === "completed";
+  const isActive = status === "active";
+
   return (
-    <div className="flex items-center gap-3 py-2">
+    <div className="flex items-center gap-3 py-1.5">
       <div
-        className="flex h-5 w-5 shrink-0 items-center justify-center"
-        style={{
-          background:
-            status === "completed"
-              ? "#22c55e"
-              : status === "active"
-                ? "#3b82f6"
-                : "#e5e7eb",
-        }}
+        className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-none border-2 transition-colors ${
+          isCompleted
+            ? "border-[#22c55e] bg-[#22c55e]"
+            : isActive
+              ? "border-[#3b82f6] bg-[#3b82f6]/20"
+              : "border-white/[0.2] bg-white/[0.04]"
+        }`}
       >
-        {status === "completed" && <Check className="h-3 w-3 text-white" />}
-        {status === "active" && (
-          <span className="h-1.5 w-1.5 animate-pulse bg-white" />
+        {isCompleted && (
+          <Check className="h-3 w-3 text-white badge-check-in" />
+        )}
+        {isActive && (
+          <span className="h-1.5 w-1.5 animate-pulse rounded-none bg-[#60a5fa]" />
         )}
       </div>
       <span
-        className={`text-sm ${
-          status === "completed"
-            ? "text-gray-900 line-through"
-            : status === "active"
-              ? "text-gray-900 font-medium"
-              : "text-gray-400"
+        className={`text-xs ${
+          isCompleted
+            ? "text-[#a8a29e] line-through"
+            : isActive
+              ? "text-[#fafaf9] font-medium"
+              : "text-[#78716c]"
         }`}
       >
         {label}
@@ -75,210 +82,191 @@ function StepRow({ label, status }: { label: string; status: BadgeStepStatus }) 
   );
 }
 
-export default function BadgesPage() {
-  const [selectedId, setSelectedId] = useState<string | null>(
-    MOCK_BADGES[0]?.id ?? null
+function BadgeCard({
+  badge,
+  index,
+  isExpanded,
+  onExpand,
+  onCollapse,
+}: {
+  badge: (typeof MOCK_BADGES)[number];
+  index: number;
+  isExpanded: boolean;
+  onExpand: () => void;
+  onCollapse: () => void;
+}) {
+  const [progressVisible, setProgressVisible] = useState(false);
+  useEffect(() => {
+    const t = setTimeout(() => setProgressVisible(true), 100 + index * 80);
+    return () => clearTimeout(t);
+  }, [index]);
+
+  const IconComponent = ICON_MAP[badge.icon as IconName] ?? Brain;
+  const achieved = badge.achieved;
+  const inProgress = badge.steps.some((s) => s.status === "active");
+  const completedSteps = badge.steps.filter(
+    (s) => s.status === "completed"
+  ).length;
+  const totalSteps = badge.steps.length;
+  const progressPct =
+    totalSteps > 0 ? Math.round((completedSteps / totalSteps) * 100) : 0;
+  const color = progressColor(achieved, inProgress);
+
+  return (
+    <article
+      className="badge-card-enter self-start overflow-hidden rounded-none border border-white/[0.08] bg-white/[0.04] p-3 shadow-lg backdrop-blur-md transition-[border-color,box-shadow,transform] duration-500 ease-in-out hover:-translate-y-1 hover:border-white/[0.12] hover:shadow-xl hover:shadow-black/20"
+      style={{
+        animationDelay: `${index * 0.06}s`,
+        animationFillMode: "backwards",
+      }}
+      onMouseEnter={onExpand}
+      onMouseLeave={onCollapse}
+    >
+      {/* Collapsed: icon + title + hint (always visible) */}
+      <div className="flex items-center gap-2.5 min-w-0">
+        <div
+          className="flex h-8 w-8 shrink-0 items-center justify-center rounded-none transition-colors"
+          style={{
+            background: `${color}20`,
+            color,
+          }}
+        >
+          <IconComponent className="h-3.5 w-3.5" />
+        </div>
+        <div className="min-w-0 flex-1">
+          <h3 className="truncate text-sm font-semibold tracking-tight text-[#fafaf9]">
+            {badge.title}
+          </h3>
+          <p className="text-[10px] text-[#78716c]">
+            {completedSteps} of {totalSteps} · {progressPct}%
+          </p>
+        </div>
+      </div>
+
+      {/* Expanded only when this card is hovered: progress bar, steps, status */}
+      <div
+        className="block overflow-hidden transition-[max-height] duration-500 ease-in-out"
+        style={{ maxHeight: isExpanded ? 280 : 0 }}
+      >
+        <div className="pt-3">
+          {/* Progress bar */}
+          <div className="flex items-center gap-2">
+            <span className="text-[10px] font-medium tabular-nums text-[#78716c]">
+              {completedSteps} of {totalSteps}
+            </span>
+            <div className="flex-1 h-1.5 overflow-hidden rounded-none bg-white/[0.08]">
+              <div
+                className="h-full rounded-none transition-all duration-700 ease-out"
+                style={{
+                  width: progressVisible ? `${progressPct}%` : "0%",
+                  backgroundColor: color,
+                }}
+              />
+            </div>
+            <span
+              className="text-[10px] font-semibold tabular-nums transition-colors duration-500"
+              style={{ color: progressVisible ? color : "#78716c" }}
+            >
+              {progressPct}%
+            </span>
+          </div>
+
+          {/* Step checklist */}
+          <div className="mt-3 space-y-0">
+            {badge.steps.map((step) => (
+              <StepRow
+                key={step.label}
+                label={step.label}
+                status={step.status}
+              />
+            ))}
+          </div>
+
+          {/* Status pill */}
+          <div className="mt-3 flex items-center gap-2 border-t border-white/[0.06] pt-3">
+            <span className="text-[10px] font-medium text-[#78716c]">
+              Status
+            </span>
+            <span
+              className="inline-flex items-center gap-1 rounded-none px-2 py-0.5 text-[10px] font-semibold"
+              style={{
+                background: `${color}18`,
+                color,
+              }}
+            >
+              {statusLabel(achieved, inProgress)}
+            </span>
+          </div>
+        </div>
+      </div>
+    </article>
   );
+}
 
+export default function BadgesPage() {
+  const [hoveredBadgeId, setHoveredBadgeId] = useState<string | null>(null);
+  const masteryBadges = useMemo(
+    () => MOCK_BADGES.filter((b) => b.type === "mastery"),
+    []
+  );
+  const tutorialBadges = useMemo(
+    () => MOCK_BADGES.filter((b) => b.type === "tutorial"),
+    []
+  );
   const earnedCount = MOCK_BADGES.filter((b) => b.achieved).length;
-  const selectedBadge = MOCK_BADGES.find((b) => b.id === selectedId) ?? null;
-
-  const selectedStatus = selectedBadge ? statusOf(selectedBadge) : "locked";
-  const SelectedIcon = selectedBadge
-    ? (ICON_MAP[selectedBadge.icon] ?? Brain)
-    : Brain;
-  const completedSteps = selectedBadge
-    ? selectedBadge.steps.filter((s) => s.status === "completed").length
-    : 0;
-  const totalSteps = selectedBadge?.steps.length ?? 0;
-  const progressPct = totalSteps > 0 ? Math.round((completedSteps / totalSteps) * 100) : 0;
+  const totalCount = MOCK_BADGES.length;
 
   return (
     <>
       <TopBar />
-      <main className="mx-auto max-w-[1200px] px-8 py-10">
-        <header className="mb-8">
-          <h1 className="text-2xl font-semibold tracking-tight text-white">
+      <main className="mx-auto max-w-[1100px] px-4 py-6 sm:px-6">
+        <header className="mb-6">
+          <h1 className="text-xl font-semibold tracking-tight text-white">
             Badges
           </h1>
-          <p className="mt-1 text-sm text-[#78716c]">
-            Earn badges by mastering learning paths. {earnedCount} of{" "}
-            {MOCK_BADGES.length} earned.
+          <p className="mt-0.5 text-xs text-[#78716c]">
+            Complete Learn → Practice → Master for each path.{" "}
+            <span className="font-medium text-[#a8a29e]">
+              {earnedCount} of {totalCount} earned
+            </span>
           </p>
         </header>
 
-        {/* Shape grid */}
-        <div className="flex flex-wrap items-center gap-6">
-          {MOCK_BADGES.map((badge, i) => {
-            const status = statusOf(badge);
-            const accent = accentFor(status);
-            const Icon = ICON_MAP[badge.icon] ?? Brain;
-            const isSelected = selectedId === badge.id;
-            const useAlt = i % 2 === 1;
-
-            return (
-              <button
+        <section className="mb-8">
+          <h2 className="mb-3 text-[10px] font-medium uppercase tracking-wider text-[#78716c]">
+            Category Mastery
+          </h2>
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            {masteryBadges.map((badge, i) => (
+              <BadgeCard
                 key={badge.id}
-                type="button"
-                onClick={() => setSelectedId(badge.id)}
-                className="group flex flex-col items-center gap-2"
-              >
-                <div
-                  className={`relative flex h-[120px] w-[120px] items-center justify-center transition-all duration-300 ${
-                    isSelected
-                      ? "badge-selected"
-                      : useAlt
-                        ? "badge-morph-alt"
-                        : "badge-morph"
-                  }`}
-                  style={{
-                    animationDelay: `${MORPH_DELAYS[i % MORPH_DELAYS.length]}s`,
-                    background:
-                      status === "locked"
-                        ? "rgba(255,255,255,0.03)"
-                        : `${accent}10`,
-                    border: isSelected
-                      ? `2px solid ${accent}`
-                      : `1px solid ${accent}33`,
-                    boxShadow: isSelected
-                      ? `0 0 24px ${accent}22`
-                      : "none",
-                  }}
-                >
-                  {status === "locked" ? (
-                    <Lock className="h-6 w-6 text-[#78716c]" />
-                  ) : (
-                    <div style={{ color: accent }}>
-                      <Icon className="h-7 w-7" />
-                    </div>
-                  )}
-
-                  {status === "completed" && (
-                    <div
-                      className="absolute -bottom-1 -right-1 flex h-5 w-5 items-center justify-center bg-[#22c55e]"
-                    >
-                      <Check className="h-3 w-3 text-white" />
-                    </div>
-                  )}
-                </div>
-
-                <span
-                  className={`text-xs font-medium transition-colors ${
-                    isSelected ? "text-white" : "text-[#a8a29e]"
-                  }`}
-                >
-                  {badge.title}
-                </span>
-              </button>
-            );
-          })}
-        </div>
-
-        {/* Detail card (Pinterest-style, white panel) */}
-        {selectedBadge && (
-          <div className="mt-8 panel-white p-0 overflow-hidden" style={{ maxWidth: 480 }}>
-            {/* Card header */}
-            <div className="flex items-center justify-between border-b border-gray-100 px-6 py-4">
-              <div className="flex items-center gap-3">
-                <div
-                  className="flex h-9 w-9 items-center justify-center"
-                  style={{
-                    background: `${accentFor(selectedStatus)}15`,
-                    color: accentFor(selectedStatus),
-                  }}
-                >
-                  <SelectedIcon className="h-5 w-5" />
-                </div>
-                <h2 className="text-lg font-semibold text-gray-900">
-                  {selectedBadge.title}
-                </h2>
-              </div>
-              <button className="p-1 text-gray-400 hover:text-gray-600 transition-colors">
-                <MoreHorizontal className="h-5 w-5" />
-              </button>
-            </div>
-
-            {/* Progress bar */}
-            <div className="px-6 pt-4">
-              <div className="flex items-center gap-3">
-                <div className="flex items-center gap-1.5">
-                  <span
-                    className="flex h-5 w-5 items-center justify-center text-[10px] font-bold"
-                    style={{
-                      background: `${accentFor(selectedStatus)}15`,
-                      color: accentFor(selectedStatus),
-                    }}
-                  >
-                    {completedSteps}
-                  </span>
-                  <span className="text-xs text-gray-400">
-                    of {totalSteps}
-                  </span>
-                </div>
-                <div className="flex-1 h-2 bg-gray-100">
-                  <div
-                    className="h-full transition-all duration-500"
-                    style={{
-                      width: `${progressPct}%`,
-                      background: accentFor(selectedStatus),
-                    }}
-                  />
-                </div>
-                <span className="text-xs font-semibold tabular-nums text-gray-500">
-                  {progressPct}%
-                </span>
-              </div>
-            </div>
-
-            {/* Step checklist */}
-            <div className="px-6 py-3 divide-y divide-gray-100">
-              {selectedBadge.steps.map((step) => (
-                <StepRow
-                  key={step.label}
-                  label={step.label}
-                  status={step.status}
-                />
-              ))}
-            </div>
-
-            {/* Footer tags */}
-            <div className="flex items-center gap-3 border-t border-gray-100 px-6 py-4">
-              <div className="flex items-center gap-1.5">
-                <span className="text-[11px] font-medium text-gray-400">
-                  Status
-                </span>
-                <span
-                  className="inline-flex items-center gap-1 px-2 py-0.5 text-[11px] font-semibold"
-                  style={{
-                    background: `${accentFor(selectedStatus)}15`,
-                    color: accentFor(selectedStatus),
-                  }}
-                >
-                  {selectedStatus === "completed"
-                    ? "Completed"
-                    : selectedStatus === "active"
-                      ? "In Progress"
-                      : "Locked"}
-                </span>
-              </div>
-              <div className="flex items-center gap-1.5">
-                <span className="text-[11px] font-medium text-gray-400">
-                  Type
-                </span>
-                <span className="inline-flex items-center px-2 py-0.5 text-[11px] font-semibold bg-gray-100 text-gray-600">
-                  {selectedBadge.type === "mastery" ? "Mastery" : "Tutorial"}
-                </span>
-              </div>
-            </div>
-
-            {/* Description */}
-            <div className="border-t border-gray-100 px-6 py-4">
-              <p className="text-sm text-gray-500 leading-relaxed">
-                {selectedBadge.description}
-              </p>
-            </div>
+                badge={badge}
+                index={i}
+                isExpanded={hoveredBadgeId === badge.id}
+                onExpand={() => setHoveredBadgeId(badge.id)}
+                onCollapse={() => setHoveredBadgeId(null)}
+              />
+            ))}
           </div>
-        )}
+        </section>
+
+        <section>
+          <h2 className="mb-3 text-[10px] font-medium uppercase tracking-wider text-[#78716c]">
+            Tutorial Completion
+          </h2>
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {tutorialBadges.map((badge, i) => (
+              <BadgeCard
+                key={badge.id}
+                badge={badge}
+                index={masteryBadges.length + i}
+                isExpanded={hoveredBadgeId === badge.id}
+                onExpand={() => setHoveredBadgeId(badge.id)}
+                onCollapse={() => setHoveredBadgeId(null)}
+              />
+            ))}
+          </div>
+        </section>
       </main>
     </>
   );
