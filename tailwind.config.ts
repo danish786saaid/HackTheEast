@@ -9,6 +9,15 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
+        oax: {
+          navy: "#14345E",
+          "navy-light": "#1e4a7a",
+          "navy-dark": "#0e2442",
+          cream: "#f8f7f4",
+          "gray-text": "#4a5568",
+          "gray-muted": "#718096",
+          accent: "#2b6cb0",
+        },
         app: {
           bg: "#0c0a09",
           surface: "#1c1917",
@@ -43,6 +52,9 @@ const config: Config = {
       },
       fontFamily: {
         sans: ["Inter", "system-ui", "sans-serif"],
+      },
+      maxWidth: {
+        "oax-content": "1280px",
       },
     },
   },
