@@ -245,13 +245,14 @@ export default function TopBar() {
 
             {userMenuOpen && (
               <div className="absolute right-0 top-full mt-1 w-48 border border-white/[0.08] bg-[#1c1917] py-1 shadow-xl z-50">
-                <a
+                <Link
                   href="/settings"
+                  onClick={() => setUserMenuOpen(false)}
                   className="flex w-full items-center gap-2 px-4 py-2.5 text-sm text-[#a8a29e] hover:bg-white/[0.06] hover:text-white transition-colors"
                 >
                   <Settings className="h-4 w-4" />
                   Settings
-                </a>
+                </Link>
                 <button
                   type="button"
                   onClick={handleLogout}
