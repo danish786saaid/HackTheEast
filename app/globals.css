@@ -338,3 +338,24 @@ body {
   -webkit-text-fill-color: transparent;
   animation: shimmer 4s linear infinite;
 }
+
+/* ---------- Knowledge Map: running glow on connecting lines ---------- */
+@keyframes dashFlow {
+  to { stroke-dashoffset: -24; }
+}
+@keyframes lineGlow {
+  0%, 100% { stroke-opacity: 0.08; filter: drop-shadow(0 0 2px rgba(59,130,246,0.1)); }
+  50%      { stroke-opacity: 0.25; filter: drop-shadow(0 0 6px rgba(59,130,246,0.4)); }
+}
+.knowledge-line {
+  animation: dashFlow 2s linear infinite, lineGlow 3s ease-in-out infinite;
+}
+
+/* ---------- Knowledge Map: floating node squares ---------- */
+@keyframes nodeFloat {
+  0%, 100% { transform: translateY(0); box-shadow: 0 0 0 transparent; }
+  50%      { transform: translateY(-3px); box-shadow: 0 0 12px rgba(59,130,246,0.15); }
+}
+.knowledge-node {
+  animation: nodeFloat 4s ease-in-out infinite;
+}

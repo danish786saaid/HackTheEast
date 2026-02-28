@@ -225,20 +225,22 @@ export default function Dashboard() {
             return (
               <line
                 key={i}
+                className="knowledge-line"
                 x1={`${fromX}%`}
                 y1={`${fromY}%`}
                 x2={`${toX}%`}
                 y2={`${toY}%`}
-                stroke="rgba(255,255,255,0.06)"
-                strokeWidth="1"
-                strokeDasharray="4 4"
+                stroke="rgba(59,130,246,0.15)"
+                strokeWidth="1.5"
+                strokeDasharray="6 6"
+                style={{ animationDelay: `${i * 0.4}s` }}
               />
             );
           })}
         </svg>
 
         {/* Learning domain nodes */}
-        {categoryEngagement.map((category) => {
+        {categoryEngagement.map((category, catIdx) => {
           const layout = CATEGORY_LAYOUT[category.id];
           if (!layout) return null;
           const { width, height } = getCategorySize(category, maxMinutes);
@@ -248,13 +250,14 @@ export default function Dashboard() {
           return (
             <div
               key={category.id}
-              className="absolute"
+              className="absolute knowledge-node"
               style={{
                 left: `${layout.x}%`,
                 top: `${layout.y}%`,
                 width,
                 height,
                 transform: `rotate(${layout.rotation}deg)`,
+                animationDelay: `${catIdx * 0.6}s`,
                 border: `1px solid ${
                   filled
                     ? "rgba(255,255,255,0.22)"
