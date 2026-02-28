@@ -2,21 +2,26 @@
 
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
-import OnboardingFlow from "@/components/onboarding/OnboardingFlow";
+import TopBar from "@/components/layout/TopBar";
+import Dashboard from "@/components/dashboard/Dashboard";
 import { useAuth } from "@/lib/auth-context";
 
-export default function Home() {
+export default function DashboardPage() {
   const router = useRouter();
   const { user, onboardingComplete, isAuthenticated } = useAuth();
 
-  // Authenticated users with completed onboarding go to dashboard
   useEffect(() => {
-    if (isAuthenticated && user && onboardingComplete) {
-      router.replace("/dashboard");
+    if (!isAuthenticated || !user) {
+      router.replace("/");
+      return;
+    }
+    if (!onboardingComplete) {
+      router.replace("/");
+      return;
     }
   }, [isAuthenticated, user, onboardingComplete, router]);
 
-  if (isAuthenticated && user && onboardingComplete) {
+  if (!isAuthenticated || !user || !onboardingComplete) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-[#0c0a09]">
         <div className="h-8 w-8 animate-pulse rounded-lg bg-white/10" />
@@ -24,5 +29,10 @@ export default function Home() {
     );
   }
 
-  return <OnboardingFlow redirectOnComplete="/dashboard" />;
+  return (
+    <>
+      <TopBar />
+      <Dashboard />
+    </>
+  );
 }
