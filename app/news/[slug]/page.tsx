@@ -65,7 +65,7 @@ export default function ArticlePage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (typeof window === "undefined") return;
+    if (typeof window === "undefined" || !params?.slug) return;
     try {
       const stored = sessionStorage.getItem(`news-article-${params.slug}`);
       if (stored) {
@@ -75,7 +75,7 @@ export default function ArticlePage() {
       // ignore
     }
     setLoading(false);
-  }, [params.slug]);
+  }, [params?.slug]);
 
   if (loading) {
     return (
