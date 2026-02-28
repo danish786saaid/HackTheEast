@@ -206,7 +206,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (supabase) {
       const {
         data: { subscription },
-      } = supabase.auth.onAuthStateChange(async (_event, session) => {
+      } = supabase.auth.onAuthStateChange(async (_event: string, session: { user?: { id: string; email?: string | null; user_metadata?: Record<string, unknown> } } | null) => {
         if (session?.user) {
           const mapped = mapSupabaseUser(session.user);
           await migrateGuestPrefsIfNeeded(mapped.id);
