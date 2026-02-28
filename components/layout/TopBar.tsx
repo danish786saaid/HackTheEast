@@ -23,6 +23,7 @@ const navItems = [
   { label: "Tutorials", href: "/tutorials" },
   { label: "Badges", href: "/badges" },
   { label: "News", href: "/news" },
+  { label: "About Us", href: "/about" },
 ];
 
 export default function TopBar() {
@@ -61,7 +62,7 @@ export default function TopBar() {
     logout();
     setUserMenuOpen(false);
     setNotifsOpen(false);
-    router.push("/onboarding");
+    router.push("/onboarding/login");
     router.refresh();
   }
 
