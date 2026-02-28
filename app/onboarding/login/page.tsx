@@ -16,7 +16,7 @@ const STEPS = [
 export default function LoginPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { user, login, signInWithOAuth } = useAuth();
+  const { user, onboardingComplete, login, signInWithOAuth } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -26,8 +26,9 @@ export default function LoginPage() {
   // Redirect if already authenticated — go to dashboard, not onboarding
   useEffect(() => {
     if (!user) return;
-    router.replace("/");
-  }, [user, router]);
+    if (onboardingComplete) router.replace("/dashboard");
+    else router.replace("/");
+  }, [user, onboardingComplete, router]);
 
   const handleSubmit = useCallback(
     async (e: React.FormEvent) => {

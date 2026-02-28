@@ -19,7 +19,7 @@ import { useAuth, initials } from "@/lib/auth-context";
 import { MOCK_NOTIFICATIONS, type MockNotification, type MockNotificationType } from "@/lib/constants";
 
 const navItems = [
-  { label: "Dashboard", href: "/" },
+  { label: "Dashboard", href: "/dashboard" },
   { label: "Tutorials", href: "/tutorials" },
   { label: "Badges", href: "/badges" },
   { label: "News", href: "/news" },
@@ -62,7 +62,7 @@ export default function TopBar() {
     logout();
     setUserMenuOpen(false);
     setNotifsOpen(false);
-    router.push("/onboarding/login");
+    router.push("/");
     router.refresh();
   }
 
@@ -131,7 +131,7 @@ export default function TopBar() {
       <div className="mx-auto flex h-14 max-w-[1600px] items-center justify-between px-6">
         {/* Left: logo + nav */}
         <div className="flex items-center gap-8">
-          <Link href="/" className="flex items-center gap-2.5">
+          <Link href="/dashboard" className="flex items-center gap-2.5">
             <div className="flex h-8 w-8 items-center justify-center bg-[#3b82f6]">
               <BookOpen className="h-4 w-4 text-white" />
             </div>

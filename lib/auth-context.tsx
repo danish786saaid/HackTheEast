@@ -12,6 +12,7 @@ import { createClient } from "@/lib/supabase/client";
 
 // ── Storage keys ─────────────────────────────────────────
 const AUTH_STORAGE_KEY = "edtech-auth";
+const GUEST_ONBOARDING_KEY = "edtech-guest-onboarding";
 
 // ── Types ────────────────────────────────────────────────
 export type User = {
@@ -49,6 +50,7 @@ type AuthContextValue = {
   signInWithOAuth: (provider: "google") => Promise<void>;
   signInWithEmail: (email: string) => Promise<void>;
   saveOnboardingPrefs: (prefs: OnboardingPrefs) => Promise<void>;
+  getGuestOnboardingPrefs: () => OnboardingPrefs | null;
   updateProfile: (updates: Partial<Pick<User, "name" | "email" | "handle" | "avatarUrl">>) => void;
 };
 
@@ -117,6 +119,50 @@ async function upsertOnboardingToSupabase(
   if (error) console.error("[auth] Failed to persist onboarding:", error.message);
 }
 
+function loadGuestOnboarding(): OnboardingPrefs | null {
+  if (typeof window === "undefined") return null;
+  try {
+    const raw = localStorage.getItem(GUEST_ONBOARDING_KEY);
+    return raw ? (JSON.parse(raw) as OnboardingPrefs) : null;
+  } catch {
+    return null;
+  }
+}
+
+function cacheGuestOnboarding(prefs: OnboardingPrefs) {
+  if (typeof window === "undefined") return;
+  localStorage.setItem(GUEST_ONBOARDING_KEY, JSON.stringify(prefs));
+}
+
+function clearGuestOnboarding() {
+  if (typeof window !== "undefined") localStorage.removeItem(GUEST_ONBOARDING_KEY);
+}
+
+/**
+ * Check if the user has a user_onboarding record in Supabase (onboarding complete).
+ */
+async function hasOnboardingRecord(userId: string): Promise<boolean> {
+  const supabase = createClient();
+  if (!supabase) return false;
+  const { data, error } = await supabase
+    .from("user_onboarding")
+    .select("user_id")
+    .eq("user_id", userId)
+    .maybeSingle();
+  return !error && !!data;
+}
+
+/**
+ * After OAuth redirect, if guest had cached onboarding prefs,
+ * persist them to Supabase and clear the cache.
+ */
+async function migrateGuestPrefsIfNeeded(userId: string) {
+  const cached = loadGuestOnboarding();
+  if (!cached) return;
+  await upsertOnboardingToSupabase(userId, cached);
+  clearGuestOnboarding();
+}
+
 // ── Provider ─────────────────────────────────────────────
 
 export function AuthProvider({ children }: { children: ReactNode }) {
@@ -140,7 +186,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         } = await supabase.auth.getSession();
         if (session?.user) {
           const mapped = mapSupabaseUser(session.user);
-          persist(mapped, true);
+          await migrateGuestPrefsIfNeeded(mapped.id);
+          const complete = await hasOnboardingRecord(mapped.id);
+          persist(mapped, complete);
           setHydrated(true);
           return;
         }
@@ -158,10 +206,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (supabase) {
       const {
         data: { subscription },
-      } = supabase.auth.onAuthStateChange(async (_event: string, session: { user?: { id: string; email?: string | null; user_metadata?: Record<string, unknown> } } | null) => {
+      } = supabase.auth.onAuthStateChange(async (_event, session) => {
         if (session?.user) {
           const mapped = mapSupabaseUser(session.user);
-          persist(mapped, true);
+          await migrateGuestPrefsIfNeeded(mapped.id);
+          const complete = await hasOnboardingRecord(mapped.id);
+          persist(mapped, complete);
         } else {
           persist(null, false);
         }
@@ -212,10 +262,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const supabase = createClient();
       if (user && supabase) {
         await upsertOnboardingToSupabase(user.id, prefs);
+        clearGuestOnboarding();
+      } else {
+        cacheGuestOnboarding(prefs);
       }
     },
     [user]
   );
+
+  const getGuestOnboardingPrefs = useCallback(() => loadGuestOnboarding(), []);
 
   // ── Password-based login ───────────────────────────────
   const login = useCallback(
@@ -318,6 +373,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     signInWithOAuth,
     signInWithEmail,
     saveOnboardingPrefs,
+    getGuestOnboardingPrefs,
     updateProfile,
   };
 

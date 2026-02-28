@@ -15,7 +15,7 @@ const STEPS = [
 
 export default function RegisterPage() {
   const router = useRouter();
-  const { user, register: doRegister, signInWithOAuth } = useAuth();
+  const { user, onboardingComplete, register: doRegister, signInWithOAuth } = useAuth();
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
@@ -27,8 +27,9 @@ export default function RegisterPage() {
   // Redirect if already authenticated — go to dashboard, not onboarding
   useEffect(() => {
     if (!user) return;
-    router.replace("/");
-  }, [user, router]);
+    if (onboardingComplete) router.replace("/dashboard");
+    else router.replace("/");
+  }, [user, onboardingComplete, router]);
 
   const handleSubmit = useCallback(
     async (e: React.FormEvent) => {
