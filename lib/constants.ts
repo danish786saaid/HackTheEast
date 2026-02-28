@@ -185,60 +185,6 @@ export const MOCK_TUTORIALS = [
   },
 ];
 
-export const MOCK_ACTIVE_TUTORIALS = [
-  {
-    id: "t1",
-    title: "Introduction to DeFi",
-    currentModule: 3,
-    totalModules: 5,
-    progress: 62,
-  },
-  {
-    id: "t2",
-    title: "AI Ethics & Governance",
-    currentModule: 4,
-    totalModules: 5,
-    progress: 85,
-  },
-  {
-    id: "t3",
-    title: "Blockchain Fundamentals",
-    currentModule: 1,
-    totalModules: 4,
-    progress: 15,
-  },
-];
-
-export const LEARNING_HEALTH = [
-  { label: "EFFICIENCY", value: "88%", sublabel: "completion rate" },
-  { label: "TIME SAVED", value: "6.2", unit: "HRS", sublabel: "from AI summaries" },
-  { label: "MASTERY", value: "78%", sublabel: "knowledge score" },
-];
-
-export const WEEKLY_STATS = [
-  { label: "Articles", value: "47" },
-  { label: "Quizzes", value: "12" },
-  { label: "Hours", value: "6.2h" },
-  { label: "Score", value: "+5%" },
-];
-
-export const LEARNING_NODES = [
-  { id: "ai", label: "No.101", subtitle: "AI & ML", x: 28, y: 18, w: 160, h: 130, rotation: 12, filled: true },
-  { id: "defi", label: "No.205", subtitle: "DeFi", x: 62, y: 12, w: 110, h: 95, rotation: -6, filled: false },
-  { id: "chain", label: "No.302", subtitle: "Blockchain", x: 42, y: 50, w: 145, h: 120, rotation: 7, filled: true },
-  { id: "policy", label: "No.410", subtitle: "Policy", x: 18, y: 68, w: 95, h: 85, rotation: -14, filled: false },
-  { id: "ethics", label: "No.503", subtitle: "AI Ethics", x: 70, y: 55, w: 120, h: 105, rotation: 18, filled: false },
-  { id: "smart", label: "No.608", subtitle: "Smart Contracts", x: 55, y: 80, w: 100, h: 90, rotation: -3, filled: true },
-];
-
-export const NODE_CONNECTIONS = [
-  { from: "ai", to: "chain", x1: 38, y1: 32, x2: 50, y2: 52 },
-  { from: "chain", to: "defi", x1: 55, y1: 50, x2: 65, y2: 22 },
-  { from: "chain", to: "smart", x1: 52, y1: 62, x2: 58, y2: 82 },
-  { from: "ai", to: "ethics", x1: 40, y1: 28, x2: 72, y2: 58 },
-  { from: "policy", to: "chain", x1: 28, y1: 70, x2: 44, y2: 55 },
-];
-
 export const MOCK_TOPIC_DISTRIBUTION = [
   { name: "AI & ML", value: 45, color: "#f97316" },
   { name: "Crypto", value: 25, color: "#22c55e" },

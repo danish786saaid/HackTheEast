@@ -1,20 +1,62 @@
 "use client";
 
+import Link from "next/link";
 import { useAuth } from "@/lib/auth-context";
-import {
-  MOCK_ACTIVE_TUTORIALS,
-  LEARNING_HEALTH,
-  WEEKLY_STATS,
-  MOCK_LEARNING_TREND,
-  LEARNING_NODES,
-  NODE_CONNECTIONS,
-} from "@/lib/constants";
-import { ChevronRight, Pencil, Check, AlertTriangle } from "lucide-react";
+import { useDashboardData } from "@/hooks/useDashboardData";
+import type { CategoryEngagement, CategoryEngagement as Category } from "@/lib/types";
+import { ChevronRight, Check, AlertTriangle } from "lucide-react";
+
+type CategoryLayout = {
+  x: number;
+  y: number;
+  rotation: number;
+};
+
+const CATEGORY_LAYOUT: Record<string, CategoryLayout> = {
+  ai: { x: 28, y: 18, rotation: 12 },
+  defi: { x: 62, y: 12, rotation: -6 },
+  chain: { x: 42, y: 50, rotation: 7 },
+  policy: { x: 18, y: 68, rotation: -14 },
+  ethics: { x: 70, y: 55, rotation: 18 },
+  smart: { x: 55, y: 80, rotation: -3 },
+};
+
+function getCategorySize(category: CategoryEngagement, maxMinutes: number) {
+  const minW = 90;
+  const maxW = 210;
+  const minH = 70;
+  const maxH = 170;
+
+  if (maxMinutes === 0) {
+    return { width: minW, height: minH };
+  }
+
+  const ratio = Math.max(0.15, category.totalMinutes / maxMinutes);
+  const width = minW + (maxW - minW) * ratio;
+  const height = minH + (maxH - minH) * ratio;
+
+  return { width, height };
+}
 
 export default function Dashboard() {
   const { user } = useAuth();
   const firstName = user?.name?.split(/\s+/)[0] ?? "there";
-  const maxProgress = Math.max(...MOCK_LEARNING_TREND.map((d) => d.progress));
+  const {
+    tutorials,
+    alerts,
+    weeklyActivity,
+    categoryEngagement,
+    categoryConnections,
+    stats,
+    onTrack,
+    activeTutorialCount,
+    unreadAlertCount,
+  } = useDashboardData();
+
+  const maxMinutes = categoryEngagement.reduce(
+    (acc, c) => (c.totalMinutes > acc ? c.totalMinutes : acc),
+    0
+  );
 
   return (
     <div className="flex" style={{ height: "calc(100vh - 56px)" }}>
@@ -22,45 +64,65 @@ export default function Dashboard() {
       <div className="w-[420px] shrink-0 overflow-y-auto panel-white px-8 py-7">
         {/* Title */}
         <h1 className="text-[32px] leading-[1.15] tracking-tight">
-          <span className="font-light">Learning</span>
-          <br />
-          <span className="font-bold">Overview</span>
+          <span className="font-light">Overview</span>
         </h1>
         <p className="mt-2 text-xs text-gray-400">
           Last updated &middot; 28 Feb 2026
+          <span className="ml-1 text-gray-300">(demo data)</span>
         </p>
 
         {/* Status pills */}
         <div className="mt-5 flex gap-2">
-          <span className="inline-flex items-center gap-1.5 border border-emerald-200 bg-emerald-50 px-3 py-1 text-xs font-medium text-emerald-700">
-            <Check className="h-3 w-3" />
-            On Track
+          <span
+            className={`inline-flex items-center gap-1.5 border px-3 py-1 text-xs font-medium ${
+              onTrack
+                ? "border-emerald-200 bg-emerald-50 text-emerald-700"
+                : "border-rose-200 bg-rose-50 text-rose-700"
+            }`}
+          >
+            {onTrack ? (
+              <Check className="h-3 w-3" />
+            ) : (
+              <AlertTriangle className="h-3 w-3" />
+            )}
+            {onTrack ? "On Track" : "Behind"}
           </span>
           <span className="inline-flex items-center gap-1.5 border border-gray-200 bg-gray-50 px-3 py-1 text-xs font-medium text-gray-600">
-            3 Active Paths
+            {activeTutorialCount} Active Tutorials
           </span>
-          <span className="inline-flex items-center gap-1.5 border border-amber-200 bg-amber-50 px-3 py-1 text-xs font-medium text-amber-700">
-            <AlertTriangle className="h-3 w-3" />2 Alerts
+          <span
+            className={`inline-flex items-center gap-1.5 border px-3 py-1 text-xs font-medium ${
+              unreadAlertCount > 0
+                ? "border-amber-200 bg-amber-50 text-amber-700"
+                : "border-gray-200 bg-gray-50 text-gray-400"
+            }`}
+          >
+            {unreadAlertCount > 0 && <AlertTriangle className="h-3 w-3" />}
+            {unreadAlertCount} Alerts
           </span>
         </div>
 
         {/* Active Tutorials */}
         <div className="mt-7">
-          <div className="flex items-center justify-between mb-3">
+          <div className="mb-3 flex items-center justify-between">
             <h2 className="text-sm font-semibold text-gray-900">
               Active Tutorials
             </h2>
-            <button className="flex items-center gap-0.5 text-xs font-medium text-[#3b82f6] hover:text-[#2563eb] transition-colors">
+            <Link
+              href="/tutorials"
+              className="flex items-center gap-0.5 text-xs font-medium text-[#3b82f6] transition-colors hover:text-[#2563eb]"
+            >
               View all
               <ChevronRight className="h-3.5 w-3.5" />
-            </button>
+            </Link>
           </div>
 
-          <div className="space-y-0 border border-gray-200 divide-y divide-gray-200">
-            {MOCK_ACTIVE_TUTORIALS.map((t) => (
-              <div
+          <div className="space-y-0 divide-y divide-gray-200 border border-gray-200">
+            {tutorials.slice(0, 3).map((t) => (
+              <Link
                 key={t.id}
-                className="px-4 py-3 hover:bg-gray-50 transition-colors cursor-pointer"
+                href={`/tutorials/${t.slug}`}
+                className="block px-4 py-3 transition-colors hover:bg-gray-50"
               >
                 <div className="flex items-center justify-between">
                   <p className="text-sm font-medium text-gray-900">
@@ -79,166 +141,213 @@ export default function Dashboard() {
                     style={{ width: `${t.progress}%` }}
                   />
                 </div>
-              </div>
+              </Link>
             ))}
           </div>
         </div>
 
-        {/* Learning Health */}
+        {/* This Week stats */}
         <div className="mt-7">
-          <div className="flex items-center justify-between mb-3">
-            <h2 className="text-sm font-semibold text-gray-900">
-              Learning Health
-            </h2>
-            <button className="p-1 text-gray-400 hover:text-gray-600 transition-colors">
-              <Pencil className="h-3.5 w-3.5" />
-            </button>
-          </div>
+          <h2 className="mb-3 text-sm font-semibold text-gray-900">
+            This Week
+          </h2>
 
-          <div className="grid grid-cols-3 border border-gray-200 divide-x divide-gray-200">
-            {LEARNING_HEALTH.map((stat) => (
-              <div key={stat.label} className="px-3 py-3.5 text-center">
-                <p className="text-[9px] font-semibold uppercase tracking-widest text-gray-400">
-                  {stat.label}
-                </p>
-                <p className="mt-1 text-xl font-bold tabular-nums text-gray-900">
-                  {stat.value}
-                  {stat.unit && (
-                    <span className="ml-0.5 text-xs font-medium text-gray-400">
-                      {stat.unit}
-                    </span>
-                  )}
-                </p>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Weekly Progress */}
-        <div className="mt-7">
-          <div className="flex items-center justify-between mb-3">
-            <h2 className="text-sm font-semibold text-gray-900">
-              Weekly Progress
-            </h2>
-            <button className="p-1 text-gray-400 hover:text-gray-600 transition-colors">
-              <Pencil className="h-3.5 w-3.5" />
-            </button>
-          </div>
-
-          {/* Stat pills row */}
-          <div className="grid grid-cols-4 gap-2 mb-4">
-            {WEEKLY_STATS.map((s) => (
-              <div
-                key={s.label}
-                className="border border-gray-200 px-2 py-2 text-center"
+          <div className="grid grid-cols-3 gap-2 border border-gray-200 bg-white">
+            <div className="px-3 py-3.5 text-center border-b border-gray-200">
+              <p className="text-[9px] font-semibold uppercase tracking-widest text-gray-400">
+                Efficiency
+              </p>
+              <p className="mt-1 text-xl font-bold tabular-nums text-gray-900">
+                {stats.efficiency}%
+              </p>
+            </div>
+            <div className="px-3 py-3.5 text-center border-b border-l border-gray-200">
+              <p className="text-[9px] font-semibold uppercase tracking-widest text-gray-400">
+                Reading Time
+              </p>
+              <p className="mt-1 text-xl font-bold tabular-nums text-gray-900">
+                {stats.readingHours}
+                <span className="ml-0.5 text-xs font-medium text-gray-400">
+                  hrs
+                </span>
+              </p>
+            </div>
+            <div className="px-3 py-3.5 text-center border-b border-l border-gray-200">
+              <p className="text-[9px] font-semibold uppercase tracking-widest text-gray-400">
+                Mastery
+              </p>
+              <p className="mt-1 text-xl font-bold tabular-nums text-gray-900">
+                {stats.mastery}%
+              </p>
+            </div>
+            <div className="px-3 py-3.5 text-center">
+              <p className="text-[9px] font-semibold uppercase tracking-widest text-gray-400">
+                Articles
+              </p>
+              <p className="mt-1 text-xl font-bold tabular-nums text-gray-900">
+                {stats.articleCount}
+              </p>
+            </div>
+            <div className="px-3 py-3.5 text-center border-l border-gray-200">
+              <p className="text-[9px] font-semibold uppercase tracking-widest text-gray-400">
+                Quizzes
+              </p>
+              <p className="mt-1 text-xl font-bold tabular-nums text-gray-900">
+                {stats.quizCount}
+              </p>
+            </div>
+            <div className="px-3 py-3.5 text-center border-l border-gray-200">
+              <p className="text-[9px] font-semibold uppercase tracking-widest text-gray-400">
+                Score vs Last Week
+              </p>
+              <p
+                className={`mt-1 text-xl font-bold tabular-nums ${
+                  stats.scoreVsLastWeek >= 0
+                    ? "text-emerald-600"
+                    : "text-rose-600"
+                }`}
               >
-                <p className="text-[9px] font-semibold uppercase tracking-wider text-gray-400">
-                  {s.label}
-                </p>
-                <p className="mt-0.5 text-sm font-bold tabular-nums text-gray-900">
-                  {s.value}
-                </p>
-              </div>
-            ))}
+                {stats.scoreVsLastWeek >= 0 ? "+" : ""}
+                {stats.scoreVsLastWeek}%
+              </p>
+            </div>
           </div>
 
-          {/* Bar chart */}
-          <div className="flex items-end gap-[6px]" style={{ height: 80 }}>
-            {MOCK_LEARNING_TREND.map((d) => {
-              const h = (d.progress / maxProgress) * 100;
-              return (
-                <div
-                  key={d.day}
-                  className="flex flex-1 flex-col items-center gap-1"
-                >
+          {/* Weekly reading bar chart */}
+          <div className="mt-4">
+            <p className="mb-2 text-[10px] font-medium uppercase tracking-wider text-gray-400">
+              Reading minutes per day
+            </p>
+            <div className="flex items-end gap-2" style={{ height: 72 }}>
+              {weeklyActivity.map((d) => {
+                const max = Math.max(
+                  ...weeklyActivity.map((v) => v.minutesRead),
+                  1
+                );
+                const barHeight = Math.round((d.minutesRead / max) * 56);
+                return (
                   <div
-                    className="w-full bg-[#0c0a09] transition-all"
-                    style={{ height: `${h}%` }}
-                  />
-                  <span className="text-[9px] tabular-nums text-gray-400">
-                    {d.day}
-                  </span>
-                </div>
-              );
-            })}
+                    key={d.day}
+                    className="flex flex-1 flex-col items-center justify-end gap-1"
+                  >
+                    <div
+                      className="w-full min-w-[12px] bg-gray-900"
+                      style={{
+                        height: barHeight,
+                        minHeight: d.minutesRead > 0 ? 4 : 0,
+                      }}
+                    />
+                    <span className="text-[9px] tabular-nums text-gray-400">
+                      {d.day}
+                    </span>
+                  </div>
+                );
+              })}
+            </div>
           </div>
         </div>
       </div>
 
       {/* ─── Right Panel (dark + dithered visual) ─── */}
-      <div className="flex-1 relative overflow-hidden bg-[#0c0a09]">
+      <div className="relative flex-1 overflow-hidden bg-[#0c0a09]">
         {/* Dither pattern */}
-        <div className="absolute inset-0 dither-dots" />
+        <div className="dither-dots absolute inset-0" />
 
         {/* Topo grid */}
-        <div className="absolute inset-0 topo-grid" />
+        <div className="topo-grid absolute inset-0" />
 
         {/* SVG connecting lines */}
-        <svg className="absolute inset-0 w-full h-full" style={{ zIndex: 2 }}>
-          {NODE_CONNECTIONS.map((conn, i) => (
-            <line
-              key={i}
-              x1={`${conn.x1}%`}
-              y1={`${conn.y1}%`}
-              x2={`${conn.x2}%`}
-              y2={`${conn.y2}%`}
-              stroke="rgba(255,255,255,0.06)"
-              strokeWidth="1"
-              strokeDasharray="4 4"
-            />
-          ))}
+        <svg className="absolute inset-0 h-full w-full" style={{ zIndex: 2 }}>
+          {categoryConnections.map((conn, i) => {
+            const from = categoryEngagement.find((c) => c.id === conn.from);
+            const to = categoryEngagement.find((c) => c.id === conn.to);
+            if (!from || !to) return null;
+
+            const fromLayout = CATEGORY_LAYOUT[from.id];
+            const toLayout = CATEGORY_LAYOUT[to.id];
+            if (!fromLayout || !toLayout) return null;
+
+            const fromSize = getCategorySize(from as Category, maxMinutes);
+            const toSize = getCategorySize(to as Category, maxMinutes);
+
+            const fromX = fromLayout.x + fromSize.width / 2;
+            const fromY = fromLayout.y + fromSize.height / 2;
+            const toX = toLayout.x + toSize.width / 2;
+            const toY = toLayout.y + toSize.height / 2;
+
+            return (
+              <line
+                key={i}
+                x1={`${fromX}%`}
+                y1={`${fromY}%`}
+                x2={`${toX}%`}
+                y2={`${toY}%`}
+                stroke="rgba(255,255,255,0.06)"
+                strokeWidth="1"
+                strokeDasharray="4 4"
+              />
+            );
+          })}
         </svg>
 
         {/* Learning domain nodes */}
-        {LEARNING_NODES.map((node) => (
-          <div
-            key={node.id}
-            className="absolute"
-            style={{
-              left: `${node.x}%`,
-              top: `${node.y}%`,
-              width: node.w,
-              height: node.h,
-              transform: `rotate(${node.rotation}deg)`,
-              border: `1px solid ${
-                node.filled
-                  ? "rgba(255,255,255,0.22)"
-                  : "rgba(255,255,255,0.08)"
-              }`,
-              background: node.filled
-                ? "rgba(255,255,255,0.04)"
-                : "transparent",
-              zIndex: 3,
-              transition: "border-color 0.3s, background 0.3s",
-            }}
-          >
-            {/* Label above shape */}
-            <span
-              className="absolute left-2 text-[11px] font-medium tracking-wide text-white/50"
+        {categoryEngagement.map((category) => {
+          const layout = CATEGORY_LAYOUT[category.id];
+          if (!layout) return null;
+          const { width, height } = getCategorySize(category, maxMinutes);
+
+          const filled = category.totalMinutes > 0;
+
+          return (
+            <div
+              key={category.id}
+              className="absolute"
               style={{
-                top: -20,
-                transform: `rotate(${-node.rotation}deg)`,
-                transformOrigin: "left bottom",
+                left: `${layout.x}%`,
+                top: `${layout.y}%`,
+                width,
+                height,
+                transform: `rotate(${layout.rotation}deg)`,
+                border: `1px solid ${
+                  filled
+                    ? "rgba(255,255,255,0.22)"
+                    : "rgba(255,255,255,0.08)"
+                }`,
+                background: filled
+                  ? "rgba(255,255,255,0.04)"
+                  : "transparent",
+                zIndex: 3,
+                transition: "border-color 0.3s, background 0.3s, width 0.3s, height 0.3s",
               }}
             >
-              {node.label}
-            </span>
-
-            {/* Subtitle inside shape */}
-            {node.filled && (
+              {/* Category ID above shape */}
               <span
-                className="absolute inset-0 flex items-center justify-center text-[10px] font-semibold uppercase tracking-widest text-white/20"
-                style={{ transform: `rotate(${-node.rotation}deg)` }}
+                className="absolute left-2 text-[11px] font-medium tracking-wide text-white/50"
+                style={{
+                  top: -20,
+                  transform: `rotate(${-layout.rotation}deg)`,
+                  transformOrigin: "left bottom",
+                }}
               >
-                {node.subtitle}
+                {category.categoryId}
               </span>
-            )}
-          </div>
-        ))}
+
+              {/* Category name inside shape */}
+              {filled && (
+                <span
+                  className="absolute inset-0 flex items-center justify-center text-[10px] font-semibold uppercase tracking-widest text-white/30"
+                  style={{ transform: `rotate(${-layout.rotation}deg)` }}
+                >
+                  {category.label}
+                </span>
+              )}
+            </div>
+          );
+        })}
 
         {/* Corner accent glow */}
         <div
-          className="absolute pointer-events-none"
+          className="pointer-events-none absolute"
           style={{
             top: "15%",
             left: "30%",
@@ -260,10 +369,10 @@ export default function Dashboard() {
             Knowledge Map
           </span>
           <span className="border border-white/[0.08] bg-white/[0.03] px-3 py-1.5 text-[11px] tabular-nums text-white/50">
-            6 Domains
+            {categoryEngagement.length} Domains
           </span>
           <span className="border border-white/[0.08] bg-white/[0.03] px-3 py-1.5 text-[11px] tabular-nums text-white/50">
-            3 Active
+            {categoryEngagement.filter((c) => c.totalMinutes > 0).length} Active
           </span>
         </div>
 
@@ -272,7 +381,7 @@ export default function Dashboard() {
           className="absolute top-6 right-8"
           style={{ zIndex: 4 }}
         >
-          <p className="text-xs text-white/30">
+          <p className="text-shimmer text-xs">
             Welcome back, {firstName}
           </p>
         </div>
