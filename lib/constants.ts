@@ -262,6 +262,190 @@ export type BadgeStep = { label: string; status: BadgeStepStatus };
 
 export type BadgeType = "mastery" | "tutorial";
 
+/** Streak data for any-activity tracking (articles, quizzes, tutorials) */
+export const MOCK_STREAK = {
+  currentStreak: 5,
+  longestStreak: 12,
+  /** 7-day activity heatmap: 0-100 intensity per day (most recent = last) */
+  weekActivity: [85, 100, 70, 90, 100, 0, 95],
+};
+
+/** Category weekly activity for bar chart (7 values, 0-100) */
+export const MOCK_CATEGORY_WEEKLY: Record<RuleCategoryId, number[]> = {
+  ai: [90, 100, 80, 95, 100, 0, 85],
+  crypto: [60, 70, 50, 80, 90, 0, 65],
+  geopolitics: [40, 50, 30, 45, 55, 0, 35],
+  career: [0, 20, 0, 10, 25, 0, 15],
+};
+
+/** Psychological achievement milestones */
+export const MOCK_ACHIEVEMENTS = [
+  // --- Row 1: always visible ---
+  {
+    id: "first-steps",
+    title: "First Steps",
+    description: "Complete your first tutorial step",
+    icon: "Target",
+    achieved: true,
+    progress: 1,
+    total: 1,
+  },
+  {
+    id: "hat-trick",
+    title: "Hat Trick",
+    description: "Earn 3 badges",
+    icon: "Trophy",
+    achieved: false,
+    progress: 2,
+    total: 3,
+  },
+  {
+    id: "week-warrior",
+    title: "Week Warrior",
+    description: "7-day streak",
+    icon: "Flame",
+    achieved: false,
+    progress: 5,
+    total: 7,
+  },
+  {
+    id: "speed-learner",
+    title: "Speed Learner",
+    description: "Complete a tutorial in one session",
+    icon: "Zap",
+    achieved: true,
+    progress: 1,
+    total: 1,
+  },
+  {
+    id: "full-house",
+    title: "Full House",
+    description: "Earn all badges in a category",
+    icon: "Award",
+    achieved: true,
+    progress: 1,
+    total: 1,
+  },
+  {
+    id: "scholar",
+    title: "Scholar",
+    description: "Earn all badges",
+    icon: "GraduationCap",
+    achieved: false,
+    progress: 2,
+    total: 7,
+  },
+  // --- Row 2+: collapsed by default ---
+  {
+    id: "night-owl",
+    title: "Night Owl",
+    description: "Study past midnight 3 times",
+    icon: "Moon",
+    achieved: false,
+    progress: 1,
+    total: 3,
+  },
+  {
+    id: "early-bird",
+    title: "Early Bird",
+    description: "Start a session before 7am",
+    icon: "Sunrise",
+    achieved: true,
+    progress: 1,
+    total: 1,
+  },
+  {
+    id: "bookworm",
+    title: "Bookworm",
+    description: "Read 50 articles",
+    icon: "BookOpen",
+    achieved: false,
+    progress: 47,
+    total: 50,
+  },
+  {
+    id: "quiz-master",
+    title: "Quiz Master",
+    description: "Score 90%+ on 5 quizzes",
+    icon: "Brain",
+    achieved: false,
+    progress: 3,
+    total: 5,
+  },
+  {
+    id: "explorer",
+    title: "Explorer",
+    description: "Study all 4 categories",
+    icon: "Compass",
+    achieved: false,
+    progress: 2,
+    total: 4,
+  },
+  {
+    id: "perfectionist",
+    title: "Perfectionist",
+    description: "100% on any quiz",
+    icon: "Star",
+    achieved: true,
+    progress: 1,
+    total: 1,
+  },
+  {
+    id: "marathon",
+    title: "Marathon",
+    description: "30-day streak",
+    icon: "Flame",
+    achieved: false,
+    progress: 5,
+    total: 30,
+  },
+  {
+    id: "social-learner",
+    title: "Social Learner",
+    description: "Share 3 badges publicly",
+    icon: "Share2",
+    achieved: false,
+    progress: 0,
+    total: 3,
+  },
+  {
+    id: "deep-dive",
+    title: "Deep Dive",
+    description: "Spend 2+ hours in one session",
+    icon: "Timer",
+    achieved: false,
+    progress: 0,
+    total: 1,
+  },
+  {
+    id: "comeback",
+    title: "Comeback Kid",
+    description: "Return after 7+ days away",
+    icon: "RotateCcw",
+    achieved: false,
+    progress: 0,
+    total: 1,
+  },
+  {
+    id: "century",
+    title: "Century",
+    description: "Complete 100 learning steps",
+    icon: "Trophy",
+    achieved: false,
+    progress: 34,
+    total: 100,
+  },
+  {
+    id: "polyglot",
+    title: "Polyglot",
+    description: "Master 3 different categories",
+    icon: "Globe",
+    achieved: false,
+    progress: 1,
+    total: 3,
+  },
+];
+
 export const MOCK_BADGES: {
   id: string;
   title: string;
@@ -270,6 +454,7 @@ export const MOCK_BADGES: {
   type: BadgeType;
   steps: BadgeStep[];
   achieved: boolean;
+  tutorialId?: string;
 }[] = [
   // Category Mastery (4)
   {
@@ -331,6 +516,7 @@ export const MOCK_BADGES: {
     description: "Complete the full 3-step path for decentralized finance fundamentals.",
     icon: "Wallet",
     type: "tutorial",
+    tutorialId: "tut1",
     steps: [
       { label: "Learn", status: "completed" },
       { label: "Practice", status: "completed" },
@@ -344,6 +530,7 @@ export const MOCK_BADGES: {
     description: "Earn this badge by finishing Learn, Practice, and Master for AI Ethics.",
     icon: "Shield",
     type: "tutorial",
+    tutorialId: "tut2",
     steps: [
       { label: "Learn", status: "completed" },
       { label: "Practice", status: "completed" },
@@ -357,6 +544,7 @@ export const MOCK_BADGES: {
     description: "Unlock by completing all three steps of the blockchain tutorial.",
     icon: "Layers",
     type: "tutorial",
+    tutorialId: "tut3",
     steps: [
       { label: "Learn", status: "completed" },
       { label: "Practice", status: "locked" },
