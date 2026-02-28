@@ -64,7 +64,7 @@ const statusMessages: Record<string, string> = {
 export default function TutorialDetailPage() {
   const params = useParams();
   const router = useRouter();
-  const id = params.id as string;
+  const id = params?.id as string;
   const tutorial = MOCK_TUTORIALS.find((t) => t.id === id);
 
   const [videoUrl, setVideoUrl] = useState<string | null>(null);

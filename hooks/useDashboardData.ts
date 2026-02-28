@@ -1,5 +1,3 @@
-"use client";
-
 import { useMemo } from "react";
 import type {
   DashboardTutorial,
@@ -7,14 +5,10 @@ import type {
   DailyActivity,
   CategoryEngagement,
 } from "@/lib/types";
-import { useTutorialProgress } from "@/contexts/TutorialProgressContext";
-import { DASHBOARD_TO_TUTORIAL_ID } from "@/lib/tutorial-ids";
-import { getArticlesReadThisWeek } from "@/lib/articles-read";
 
 export type DashboardStats = {
   efficiency: number;
   readingHours: number;
-  tutorialsWatchedSeconds: number;
   mastery: number;
   articleCount: number;
   quizCount: number;
@@ -74,6 +68,16 @@ const MOCK_TUTORIALS: DashboardTutorial[] = [
     progress: 15,
     estimatedHours: 1.5,
     lastReadAt: "2026-02-27T19:10:00Z",
+  },
+  {
+    id: "t4",
+    title: "Tech Policy & Geopolitics",
+    slug: "tech-policy-and-geopolitics",
+    currentModule: 1,
+    totalModules: 3,
+    progress: 0,
+    estimatedHours: 1.2,
+    lastReadAt: "2026-02-20T09:00:00Z",
   },
 ];
 
@@ -141,30 +145,9 @@ const CATEGORY_CONNECTIONS: CategoryConnection[] = [
 const TARGET_MINUTES_PER_DAY = 45;
 
 export function useDashboardData(): DashboardData {
-  const { getProgress, progress } = useTutorialProgress();
-
   return useMemo(() => {
-    const baseTutorials = [...MOCK_TUTORIALS];
-
-    const tutorials: DashboardTutorial[] = baseTutorials.map((t) => {
-      const tutorialPageId = DASHBOARD_TO_TUTORIAL_ID[t.id];
-      if (tutorialPageId) {
-        const watchedPercent = getProgress(tutorialPageId);
-        const currentModule = Math.min(
-          t.totalModules,
-          Math.ceil((watchedPercent / 100) * t.totalModules) || 0
-        );
-        return {
-          ...t,
-          progress: watchedPercent,
-          currentModule,
-          slug: tutorialPageId,
-        };
-      }
-      return t;
-    });
-
-    const sortedTutorials = [...tutorials].sort((a, b) =>
+    // Sort tutorials by last-read time (most recent first)
+    const tutorials = [...MOCK_TUTORIALS].sort((a, b) =>
       a.lastReadAt < b.lastReadAt ? 1 : -1
     );
 
@@ -176,8 +159,8 @@ export function useDashboardData(): DashboardData {
 
     const unreadAlertCount = alerts.filter((a) => !a.read).length;
 
-    const activeTutorialCount = sortedTutorials.filter(
-      (t) => t.progress < 100
+    const activeTutorialCount = tutorials.filter(
+      (t) => t.progress > 0 && t.progress < 100
     ).length;
 
     const minutesThisWeek = weeklyActivity.reduce(
@@ -189,8 +172,14 @@ export function useDashboardData(): DashboardData {
       0
     );
 
-    const articlesThisWeek = getArticlesReadThisWeek();
-    const quizzesThisWeek = 0;
+    const articlesThisWeek = weeklyActivity.reduce(
+      (acc, d) => acc + d.articlesRead,
+      0
+    );
+    const quizzesThisWeek = weeklyActivity.reduce(
+      (acc, d) => acc + d.quizzesCompleted,
+      0
+    );
 
     const daysActiveThisWeek = weeklyActivity.filter(
       (d) => d.minutesRead > 0
@@ -207,40 +196,47 @@ export function useDashboardData(): DashboardData {
     );
     const efficiency = Math.round(fractionDaysActive * fractionOfTarget * 100);
 
-    // Tutorials watched & Mastery: use actual video duration when stored, else fallback
-    const DEFAULT_VIDEO_SECONDS = 5;
-    const tutorialIds = ["tut1", "tut2", "tut3"];
-    let totalWatchedSec = 0;
-    let totalSec = 0;
-    tutorialIds.forEach((tid) => {
-      const pct = getProgress(tid);
-      const duration = progress[tid]?.durationSeconds ?? DEFAULT_VIDEO_SECONDS;
-      totalWatchedSec += (pct / 100) * duration;
-      totalSec += duration;
-    });
-    const tutorialsWatchedHours = totalWatchedSec / 3600;
-    const mastery =
-      totalSec > 0 ? Math.round((totalWatchedSec / totalSec) * 100) : 0;
+    // Reading hours based on tutorial estimated durations and progress
+    const readingHours = tutorials.reduce((acc, t) => {
+      return acc + (t.progress / 100) * t.estimatedHours;
+    }, 0);
 
-    const scoreVsLastWeek = 0;
+    // Mastery: average tutorial completion
+    const mastery =
+      tutorials.length > 0
+        ? Math.round(
+            tutorials.reduce((acc, t) => acc + t.progress, 0) /
+              tutorials.length
+          )
+        : 0;
+
+    const thisWeekTasks = articlesThisWeek + quizzesThisWeek;
+    const lastWeekTasks = lastWeekActivity.reduce(
+      (acc, d) => acc + d.articlesRead + d.quizzesCompleted,
+      0
+    );
+    const scoreVsLastWeek =
+      lastWeekTasks === 0
+        ? 100
+        : Math.round(((thisWeekTasks - lastWeekTasks) / lastWeekTasks) * 100);
 
     const stats: DashboardStats = {
       efficiency,
-      readingHours: parseFloat(tutorialsWatchedHours.toFixed(1)),
-      tutorialsWatchedSeconds: Math.round(totalWatchedSec),
+      readingHours: parseFloat(readingHours.toFixed(1)),
       mastery,
       articleCount: articlesThisWeek,
-      quizCount: 0,
+      quizCount: quizzesThisWeek,
       scoreVsLastWeek,
       daysActiveThisWeek,
       daysActiveLastWeek,
     };
 
-    // On track if user has any tutorial progress
-    const onTrack = sortedTutorials.some((t) => t.progress > 0);
+    // On track if active today or yesterday
+    const lastTwo = weeklyActivity.slice(-2);
+    const onTrack = lastTwo.some((d) => d.minutesRead > 0);
 
     return {
-      tutorials: sortedTutorials,
+      tutorials,
       alerts,
       weeklyActivity,
       lastWeekActivity,
@@ -251,6 +247,6 @@ export function useDashboardData(): DashboardData {
       activeTutorialCount,
       unreadAlertCount,
     };
-  }, [getProgress, progress]);
+  }, []);
 }
 

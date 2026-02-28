@@ -11,9 +11,9 @@ type Props = {
   experienceLevel: ExperienceLevel | null;
   onBack: () => void;
   onComplete: () => void;
-  onAuthGoogle: () => void;
-  onAuthApple: () => void;
-  onAuthEmail: () => void;
+  onAuthGoogle?: () => void;
+  onAuthApple?: () => void;
+  onAuthEmail?: () => void;
 };
 
 const PROFILE_LABELS: Record<string, string> = {

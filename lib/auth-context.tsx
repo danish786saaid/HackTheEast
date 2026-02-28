@@ -47,6 +47,7 @@ type AuthContextValue = {
   signInWithEmail: (email: string) => Promise<void>;
   saveOnboardingPrefs: (prefs: OnboardingPrefs) => Promise<void>;
   getGuestOnboardingPrefs: () => OnboardingPrefs | null;
+  updateProfile: (updates: Partial<Pick<User, "name" | "email" | "handle">>) => void;
 };
 
 const AuthContext = createContext<AuthContextValue | null>(null);
@@ -214,7 +215,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (supabase) {
       const {
         data: { subscription },
-      } = supabase.auth.onAuthStateChange(async (_event, session) => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      } = supabase.auth.onAuthStateChange(async (_event: any, session: any) => {
         if (session?.user) {
           const mapped = mapSupabaseUser(session.user);
           await migrateGuestPrefsIfNeeded(mapped.id);
@@ -344,6 +346,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     persist(null, false);
   }, [persist]);
 
+  const updateProfile = useCallback(
+    (updates: Partial<Pick<User, "name" | "email" | "handle">>) => {
+      if (!user) return;
+      const next = { ...user, ...updates };
+      setUser(next);
+      saveStored({ user: next, onboardingComplete });
+    },
+    [user, onboardingComplete],
+  );
+
   const completeOnboarding = useCallback(() => {
     if (!user) return;
     setOnboardingComplete(true);
@@ -362,6 +374,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     signInWithEmail,
     saveOnboardingPrefs,
     getGuestOnboardingPrefs,
+    updateProfile,
   };
 
   if (!hydrated) {

@@ -219,7 +219,6 @@ export const MOCK_TUTORIALS = [
     duration: "45 min",
     level: "Beginner",
     imageUrl: "https://images.unsplash.com/photo-1639762681485-074b7f938ba0?w=600&q=80",
-    videoPrompt: "A cinematic educational animation showing the concept of decentralized finance. Glowing digital coins and tokens flow through interconnected blockchain nodes in a futuristic cityscape. Liquidity pools visualized as swirling vortexes of light. [Push in] Camera slowly moves through a transparent digital ledger showing yield farming returns. Clean, modern motion graphics style with blue and gold color palette.",
   },
   {
     id: "tut2",
@@ -229,7 +228,6 @@ export const MOCK_TUTORIALS = [
     duration: "38 min",
     level: "Intermediate",
     imageUrl: "https://images.unsplash.com/photo-1677442136019-21780ecad995?w=600&q=80",
-    videoPrompt: "A thought-provoking animation depicting AI ethics and governance. A humanoid robot face splits to reveal neural networks on one side and scales of justice on the other. Data streams flow through a transparent globe showing different regulatory frameworks. [Static shot] Balanced composition showing technology and human values coexisting. Sleek, minimalist style with cool blue and white tones.",
   },
   {
     id: "tut3",
@@ -239,7 +237,6 @@ export const MOCK_TUTORIALS = [
     duration: "32 min",
     level: "Beginner",
     imageUrl: "https://images.unsplash.com/photo-1620712943543-bcc4688e7485?w=600&q=80",
-    videoPrompt: "An educational 3D animation explaining blockchain technology. Transparent blocks containing encrypted data connect in a chain, floating in a dark digital space. Each block lights up as it validates transactions. [Tracking shot] Camera follows a transaction as it moves through nodes in a decentralized network. Miners represented as glowing processors verify blocks. Clean tech aesthetic with green and blue neon accents.",
   },
 ];
 

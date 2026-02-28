@@ -149,20 +149,20 @@ export async function fetchKpiData(userId: string) {
       .limit(2),
   ]);
 
-  const topicCount = (topics.data ?? []).reduce((sum, r) => sum + (r.count ?? 0), 0);
+  const topicCount = (topics.data ?? []).reduce((sum: number, r: any) => sum + (r.count ?? 0), 0);
   const articlesRead = content.count ?? 0;
 
-  const totalMinutes = (portfolio.data ?? []).reduce((sum, r) => sum + (r.time_invested ?? 0), 0);
+  const totalMinutes = (portfolio.data ?? []).reduce((sum: number, r: any) => sum + (r.time_invested ?? 0), 0);
   const timeSavedHours = Math.round((totalMinutes / 60) * 10) / 10;
 
   const avgProficiency = (portfolio.data ?? []).length
     ? Math.round(
-        (portfolio.data ?? []).reduce((sum, r) => sum + (r.proficiency ?? 0), 0) /
+        (portfolio.data ?? []).reduce((sum: number, r: any) => sum + (r.proficiency ?? 0), 0) /
           (portfolio.data ?? []).length
       )
     : 0;
 
-  const scores = (performance.data ?? []).map((r) => r.score);
+  const scores = (performance.data ?? []).map((r: any) => r.score);
   const scoreDiff = scores.length >= 2 ? scores[0] - scores[1] : 0;
 
   return {

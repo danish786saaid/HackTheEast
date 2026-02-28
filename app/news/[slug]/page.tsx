@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { recordArticleRead } from "@/lib/articles-read";
 import { useParams, useRouter } from "next/navigation";
 import TopBar from "@/components/layout/TopBar";
 import { ArrowLeft, ExternalLink, Clock, Loader2, User, Bookmark } from "lucide-react";
@@ -71,7 +70,6 @@ export default function ArticlePage() {
       const stored = sessionStorage.getItem(`news-article-${params.slug}`);
       if (stored) {
         setArticle(JSON.parse(stored));
-        recordArticleRead(params.slug as string);
       }
     } catch {
       // ignore

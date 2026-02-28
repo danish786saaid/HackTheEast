@@ -43,11 +43,14 @@ export default function Dashboard() {
   const firstName = user?.name?.split(/\s+/)[0] ?? "there";
   const {
     tutorials,
+    alerts,
+    weeklyActivity,
     categoryEngagement,
     categoryConnections,
     stats,
     onTrack,
     activeTutorialCount,
+    unreadAlertCount,
   } = useDashboardData();
 
   const maxMinutes = categoryEngagement.reduce(
@@ -69,7 +72,7 @@ export default function Dashboard() {
         </p>
 
         {/* Status pills */}
-        <div className="mt-5 flex justify-center gap-2">
+        <div className="mt-5 flex gap-2">
           <span
             className={`inline-flex items-center gap-1.5 border px-3 py-1 text-xs font-medium ${
               onTrack
@@ -86,6 +89,16 @@ export default function Dashboard() {
           </span>
           <span className="inline-flex items-center gap-1.5 border border-gray-200 bg-gray-50 px-3 py-1 text-xs font-medium text-gray-600">
             {activeTutorialCount} Active Tutorials
+          </span>
+          <span
+            className={`inline-flex items-center gap-1.5 border px-3 py-1 text-xs font-medium ${
+              unreadAlertCount > 0
+                ? "border-amber-200 bg-amber-50 text-amber-700"
+                : "border-gray-200 bg-gray-50 text-gray-400"
+            }`}
+          >
+            {unreadAlertCount > 0 && <AlertTriangle className="h-3 w-3" />}
+            {unreadAlertCount} Alerts
           </span>
         </div>
 
@@ -139,20 +152,27 @@ export default function Dashboard() {
             This Week
           </h2>
 
-          <div className="grid grid-cols-6 border border-gray-200 bg-white">
-            <div className="col-span-3 px-3 py-3.5 text-center border-b border-r border-gray-200">
+          <div className="grid grid-cols-3 gap-2 border border-gray-200 bg-white">
+            <div className="px-3 py-3.5 text-center border-b border-gray-200">
               <p className="text-[9px] font-semibold uppercase tracking-widest text-gray-400">
-                Tutorials watched
+                Efficiency
               </p>
               <p className="mt-1 text-xl font-bold tabular-nums text-gray-900">
-                {stats.tutorialsWatchedSeconds < 60
-                  ? `${stats.tutorialsWatchedSeconds} sec`
-                  : stats.tutorialsWatchedSeconds < 3600
-                    ? `${(stats.tutorialsWatchedSeconds / 60).toFixed(1)} min`
-                    : `${stats.readingHours} hrs`}
+                {stats.efficiency}%
               </p>
             </div>
-            <div className="col-span-3 px-3 py-3.5 text-center border-b border-gray-200">
+            <div className="px-3 py-3.5 text-center border-b border-l border-gray-200">
+              <p className="text-[9px] font-semibold uppercase tracking-widest text-gray-400">
+                Reading Time
+              </p>
+              <p className="mt-1 text-xl font-bold tabular-nums text-gray-900">
+                {stats.readingHours}
+                <span className="ml-0.5 text-xs font-medium text-gray-400">
+                  hrs
+                </span>
+              </p>
+            </div>
+            <div className="px-3 py-3.5 text-center border-b border-l border-gray-200">
               <p className="text-[9px] font-semibold uppercase tracking-widest text-gray-400">
                 Mastery
               </p>
@@ -160,7 +180,7 @@ export default function Dashboard() {
                 {stats.mastery}%
               </p>
             </div>
-            <div className="col-span-2 px-3 py-3.5 text-center border-r border-gray-200">
+            <div className="px-3 py-3.5 text-center">
               <p className="text-[9px] font-semibold uppercase tracking-widest text-gray-400">
                 Articles
               </p>
@@ -168,7 +188,7 @@ export default function Dashboard() {
                 {stats.articleCount}
               </p>
             </div>
-            <div className="col-span-2 px-3 py-3.5 text-center border-r border-gray-200">
+            <div className="px-3 py-3.5 text-center border-l border-gray-200">
               <p className="text-[9px] font-semibold uppercase tracking-widest text-gray-400">
                 Quizzes
               </p>
@@ -176,7 +196,7 @@ export default function Dashboard() {
                 {stats.quizCount}
               </p>
             </div>
-            <div className="col-span-2 px-3 py-3.5 text-center">
+            <div className="px-3 py-3.5 text-center border-l border-gray-200">
               <p className="text-[9px] font-semibold uppercase tracking-widest text-gray-400">
                 Score vs Last Week
               </p>
@@ -190,6 +210,39 @@ export default function Dashboard() {
                 {stats.scoreVsLastWeek >= 0 ? "+" : ""}
                 {stats.scoreVsLastWeek}%
               </p>
+            </div>
+          </div>
+
+          {/* Weekly reading bar chart */}
+          <div className="mt-4">
+            <p className="mb-2 text-[10px] font-medium uppercase tracking-wider text-gray-400">
+              Reading minutes per day
+            </p>
+            <div className="flex items-end gap-2" style={{ height: 72 }}>
+              {weeklyActivity.map((d) => {
+                const max = Math.max(
+                  ...weeklyActivity.map((v) => v.minutesRead),
+                  1
+                );
+                const barHeight = Math.round((d.minutesRead / max) * 56);
+                return (
+                  <div
+                    key={d.day}
+                    className="flex flex-1 flex-col items-center justify-end gap-1"
+                  >
+                    <div
+                      className="w-full min-w-[12px] bg-gray-900"
+                      style={{
+                        height: barHeight,
+                        minHeight: d.minutesRead > 0 ? 4 : 0,
+                      }}
+                    />
+                    <span className="text-[9px] tabular-nums text-gray-400">
+                      {d.day}
+                    </span>
+                  </div>
+                );
+              })}
             </div>
           </div>
         </div>
@@ -225,22 +278,20 @@ export default function Dashboard() {
             return (
               <line
                 key={i}
-                className="knowledge-line"
                 x1={`${fromX}%`}
                 y1={`${fromY}%`}
                 x2={`${toX}%`}
                 y2={`${toY}%`}
-                stroke="rgba(59,130,246,0.15)"
-                strokeWidth="1.5"
-                strokeDasharray="6 6"
-                style={{ animationDelay: `${i * 0.4}s` }}
+                stroke="rgba(255,255,255,0.06)"
+                strokeWidth="1"
+                strokeDasharray="4 4"
               />
             );
           })}
         </svg>
 
         {/* Learning domain nodes */}
-        {categoryEngagement.map((category, catIdx) => {
+        {categoryEngagement.map((category) => {
           const layout = CATEGORY_LAYOUT[category.id];
           if (!layout) return null;
           const { width, height } = getCategorySize(category, maxMinutes);
@@ -250,14 +301,13 @@ export default function Dashboard() {
           return (
             <div
               key={category.id}
-              className="absolute knowledge-node"
+              className="absolute"
               style={{
                 left: `${layout.x}%`,
                 top: `${layout.y}%`,
                 width,
                 height,
                 transform: `rotate(${layout.rotation}deg)`,
-                animationDelay: `${catIdx * 0.6}s`,
                 border: `1px solid ${
                   filled
                     ? "rgba(255,255,255,0.22)"
