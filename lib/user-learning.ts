@@ -37,10 +37,15 @@ export async function fetchUserTutorialProgress(
   if (error) throw error;
 
   const out: Record<string, UserTutorialProgressRow> = {};
-  (data ?? []).forEach((row) => {
+  (data ?? []).forEach((row: {
+    tutorial_id: string;
+    watched_percent: number | null;
+    duration_seconds: number | null;
+    last_watched_at: string;
+  }) => {
     out[row.tutorial_id] = {
       tutorialId: row.tutorial_id,
-      watchedPercent: row.watched_percent,
+      watchedPercent: row.watched_percent ?? 0,
       durationSeconds: row.duration_seconds ?? 0,
       lastWatchedAt: row.last_watched_at,
     };
@@ -127,7 +132,7 @@ export async function fetchUserCategoryMastery(
     .eq("user_id", userId);
   if (error) throw error;
   const out: Record<string, number> = {};
-  (data ?? []).forEach((row) => {
+  (data ?? []).forEach((row: { category_id: string; mastery_percent: number | null }) => {
     out[row.category_id] = row.mastery_percent ?? 0;
   });
   return out;
@@ -161,7 +166,12 @@ export async function fetchUserAchievements(
     .eq("user_id", userId);
   if (error) throw error;
   const out: Record<string, UserAchievementRow> = {};
-  (data ?? []).forEach((row) => {
+  (data ?? []).forEach((row: {
+    achievement_id: string;
+    progress: number | null;
+    total: number | null;
+    achieved: boolean | null;
+  }) => {
     out[row.achievement_id] = {
       achievementId: row.achievement_id,
       progress: row.progress ?? 0,

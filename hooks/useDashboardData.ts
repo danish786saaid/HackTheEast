@@ -124,7 +124,7 @@ export function useDashboardData(): DashboardData {
     Object.values(progress).forEach((entry) => {
       if (entry.lastWatchedAt) activeDaySet.add(dayKey(new Date(entry.lastWatchedAt)));
     });
-    const daysActiveThisWeek = Array.from({ length: 7 }).reduce((acc, _, i) => {
+    const daysActiveThisWeek = Array.from({ length: 7 }).reduce<number>((acc, _, i) => {
       const d = new Date(today);
       d.setDate(d.getDate() - i);
       return acc + (activeDaySet.has(dayKey(d)) ? 1 : 0);
